@@ -3,8 +3,7 @@ from models.animal import Animal, db
 from PIL import Image
 import cloudinary.uploader
 import io
-from werkzeug.utils import secure_filename
-from app import app  
+from werkzeug.utils import secure_filename 
 
 animal_bp = Blueprint('animal_bp', __name__, url_prefix='/animals')
 
