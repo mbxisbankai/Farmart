@@ -1,7 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
-db = SQLAlchemy()
+from sqlalchemy_serializer import SerializerMixin
+from app.config import db
 
-class Farmer(db.Model):
+class Farmer(db.Model, SerializerMixin):
     __tablename__ = 'farmers'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -9,4 +9,4 @@ class Farmer(db.Model):
     email = db.Column(db.String(120), nullable=False, unique=True)
     phone = db.Column(db.String(15), nullable=False, unique=True)
 
-    animals = db.relationship('Animal', backref='farmer', lazy=True)
+    animals = db.relationship('Animal', back_populates='farmer', lazy=True)

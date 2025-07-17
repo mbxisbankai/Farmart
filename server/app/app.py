@@ -1,7 +1,6 @@
 from flask import Flask
-from app.models.order import Order
-from app.models.payment import Payment
 from app.config import db, migrate, Config
+from app.models import user, cart, animal, order, payment, farmer
 
 app = Flask(__name__)
 app.config.from_object(Config)
