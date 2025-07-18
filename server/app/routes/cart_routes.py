@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from models.cart import Cart, db
-from models.animal import Animal
+from app.models.cart import Cart, db
+from app.models.animal import Animal
 
 cart_bp = Blueprint('cart_bp', __name__, url_prefix='/cart')
 

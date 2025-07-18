@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models.animal import Animal, db
+from app.models.animal import Animal, db
 from PIL import Image
 import cloudinary.uploader
 import io

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from models.farmer import Farmer
-from models import db
+from app.models.farmer import Farmer
+from app.models import db
 
 farmer_bp = Blueprint('farmer_bp', __name__, url_prefix='/farmers')
 
