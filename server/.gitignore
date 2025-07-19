@@ -1,0 +1,11 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# pytest cache
+.pytest_cache/
+
+# If they are in any subfolder or root
+**/__pycache__/
+**/.pytest_cache/
