@@ -10,6 +10,12 @@ class User(db.Model, SerializerMixin):
     username = db.Column(db.String(80), nullable=False, unique=True)
     email = db.Column(db.String(120), nullable=False, unique=True)
     _password_hash = db.Column(db.String(200), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
+    def __init__(self, username, email, is_admin=False):
+        self.username = username
+        self.email = email
+        self.is_admin = is_admin
 
     @hybrid_property
     def password(self):
