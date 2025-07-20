@@ -17,6 +17,7 @@ class User(db.Model, SerializerMixin):
         self.email = email
         self.is_admin = is_admin
 
+
     @hybrid_property
     def password(self):
         return "Password hashes may not be viewed directly"
