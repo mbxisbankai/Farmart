@@ -9,3 +9,8 @@ __pycache__/
 # If they are in any subfolder or root
 **/__pycache__/
 **/.pytest_cache/
+
+# Ignore sensitive/local files
+__pycache__/
+migrations/
+.env
