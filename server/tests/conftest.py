@@ -40,9 +40,9 @@ def seed_users(app):
         # make sure we start with an empty table
         User.query.delete()
         admin = User(username="admin", email="admin@test.com", is_admin=True)
-        admin.set_password("adminpw")
+        admin.set_password("test_adminpw")
         bob   = User(username="bob",   email="bob@test.com",   is_admin=False)
-        bob.set_password("bobpw")
+        bob.set_password("test_bobpw")
         db.session.add_all([admin, bob])
         db.session.commit()
     yield
