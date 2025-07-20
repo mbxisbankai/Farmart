@@ -9,6 +9,8 @@ flask-sqlalchemy = "*"
 flask-cors = "*"
 cloudinary = "*"
 pillow = "*"
+flask-bcrypt = "*"
+flask-restful = "*"
 
 [dev-packages]
 
