@@ -11,6 +11,7 @@ cloudinary = "*"
 pillow = "*"
 flask-bcrypt = "*"
 flask-restful = "*"
+flask-jwt-extended = "*"
 
 [dev-packages]
 

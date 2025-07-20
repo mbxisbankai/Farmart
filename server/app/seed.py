@@ -36,7 +36,7 @@ with app.app_context():
     db.session.commit()
 
     print("Seeding payments...")
-    payment1 = Payment(user_id=order1.user.id, order_id=order1.id, method="M-Pesa", status="Paid")
+    payment1 = Payment(user_id=order1.user.id, order_id=order1.id, amount=100, method="M-Pesa", status="Paid")
     db.session.add(payment1)
     db.session.commit()
 
