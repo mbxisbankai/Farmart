@@ -3,6 +3,7 @@ from app.config import db
 
 class Cart(db.Model, SerializerMixin):
     __tablename__ = 'carts'
+    serialize_rules = ("-user.carts", "-animal.carts")
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

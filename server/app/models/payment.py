@@ -5,7 +5,7 @@ from app.models.order import Order
 
 class Payment(db.Model, SerializerMixin):
     __tablename__ = 'payments'
-    serialize_rules = ("-order.payment",)
+    serialize_rules = ("-order.payment", "-user.payments")
 
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)

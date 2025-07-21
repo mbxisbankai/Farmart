@@ -3,6 +3,7 @@ from app.config import db
 
 class Farmer(db.Model, SerializerMixin):
     __tablename__ = 'farmers'
+    serialize_rules = ("-animals.farmer",)
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))

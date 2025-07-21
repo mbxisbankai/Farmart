@@ -5,6 +5,7 @@ from app.config import db, bcrypt
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
+    serialize_rules = ("-orders.user", "-payments.user", "-carts.user")
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=True)

@@ -4,8 +4,8 @@ from datetime import datetime
 
 class Order(db.Model, SerializerMixin):
     __tablename__ = "orders"
-    serialize_rules = ("-payment.order",)
-
+    serialize_rules = ("-user.orders", "-animals.order", "-payment.order")
+    
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
     status = db.Column(db.String, nullable=False)

@@ -1,7 +1,8 @@
 from flask import Flask
 from app.config import db, migrate, Config, Api
 from app.models import user, cart, animal, order, payment, farmer
-from app.routes import animal_bp, user_bp, cart_bp, farmer_bp, OrderController, OrderControllerOne, PaymentController, PaymentControllerOne
+from app.controllers.order_controller import OrderController, OrderControllerOne
+from app.routes import animal_bp, user_bp, cart_bp, farmer_bp, order_bp, PaymentController, PaymentControllerOne
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -13,6 +14,7 @@ app.register_blueprint(animal_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(cart_bp)
 app.register_blueprint(farmer_bp)
+app.register_blueprint(order_bp)
 
 api.add_resource(OrderController, '/orders')
 api.add_resource(OrderControllerOne, '/order/<int:id>')
