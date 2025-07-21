@@ -1,9 +1,7 @@
 from app.config import db
-from sqlalchemy_serializer import SerializerMixin
 
-class Animal(db.Model, SerializerMixin):
+class Animal(db.Model):
     __tablename__ = 'animals'
-    serialize_rules = ("-farmer.animals", "-order.animals", "-carts.animal")
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -20,3 +18,19 @@ class Animal(db.Model, SerializerMixin):
     carts = db.relationship('Cart', back_populates='animal', cascade='all, delete')
     farmer = db.relationship("Farmer", back_populates="animals")
     order = db.relationship("Order", back_populates="animals")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "breed": self.breed,
+            "age": self.age,
+            "price": self.price,
+            "type": self.type,
+            "is_sold": self.is_sold,
+            "picture_url": self.picture_url,
+            "farmer_id": self.farmer_id,
+            "order_id": self.order_id,
+            "farmer": {"id": self.farmer.id, "name": self.farmer.name} if self.farmer else None
+    }
+

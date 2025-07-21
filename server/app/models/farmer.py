@@ -1,9 +1,7 @@
-from sqlalchemy_serializer import SerializerMixin
 from app.config import db
 
-class Farmer(db.Model, SerializerMixin):
+class Farmer(db.Model):
     __tablename__ = 'farmers'
-    serialize_rules = ("-animals.farmer",)
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -11,3 +9,11 @@ class Farmer(db.Model, SerializerMixin):
     phone = db.Column(db.String(15), nullable=False, unique=True)
 
     animals = db.relationship('Animal', back_populates='farmer', lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "phone": self.phone
+        }

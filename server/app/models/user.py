@@ -1,11 +1,9 @@
-from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 from app.config import db, bcrypt
 
 
-class User(db.Model, SerializerMixin):
+class User(db.Model):
     __tablename__ = 'users'
-    serialize_rules = ("-orders.user", "-payments.user", "-carts.user")
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=True)
@@ -30,6 +28,13 @@ class User(db.Model, SerializerMixin):
 
     def authenticate(self, plain_password):
         return bcrypt.check_password_hash(self._password_hash, plain_password.encode('utf-8'))
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+        }
 
     carts = db.relationship('Cart', back_populates='user', lazy=True)
     orders = db.relationship("Order", back_populates="user", cascade="all, delete")

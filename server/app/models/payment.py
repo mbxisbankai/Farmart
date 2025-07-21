@@ -1,11 +1,9 @@
 from app.config import db
-from sqlalchemy_serializer import SerializerMixin
 from datetime import datetime
 from app.models.order import Order
 
-class Payment(db.Model, SerializerMixin):
+class Payment(db.Model):
     __tablename__ = 'payments'
-    serialize_rules = ("-order.payment", "-user.payments")
 
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
@@ -17,3 +15,12 @@ class Payment(db.Model, SerializerMixin):
 
     user = db.relationship("User", back_populates="payments")
     order = db.relationship("Order", back_populates="payment")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "order_id": self.order_id,
+            "user_id": self.user_id,
+            "method": self.method,
+            "status": self.status
+        }
