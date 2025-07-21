@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-from app import create_app
-from dotenv import load_dotenv
-
-
-app = create_app()
-load_dotenv()
-
-if __name__ == "__main__":
-    app.run(debug=True)
-=======
 from flask import Flask
 from app.config import db, migrate, Config, Api
 from app.models import user, cart, animal, order, payment, farmer
@@ -36,4 +25,3 @@ api.add_resource(PaymentControllerOne, '/payment/<int:id>')
 if __name__ == "__main__":
     app.run(debug=True, port=5555)
 
->>>>>>> 73fa3ce0cffa69cf5a9b22360da7d1afcfc5ffc2
