@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, session, request
 from app.models import db, Cart, Order, Payment
 from datetime import datetime
 from app.services.payment_service import pay_order
+from app.utils.email import send_order_confirmation
 
 order_bp = Blueprint('order_bp', __name__)
 
@@ -24,11 +25,22 @@ def checkout_order():
         created_at=datetime.now()
     )
     db.session.add(new_order)
-    db.session.flush()  
+    db.session.flush()
 
+    summary_lines = []
     for item in cart_items:
         item.animal.order_id = new_order.id
+        summary_lines.append(f"- {item.animal.name}: ${item.animal.price}")
         db.session.delete(item)
+
+    order_summary = f"""
+    Order ID: {new_order.id}
+    Date: {new_order.created_at.strftime('%Y-%m-%d %H:%M')}
+    Items:
+    {chr(10).join(summary_lines)}
+    
+    Total: ${total}
+    """
 
     payment = Payment(
         order_id=new_order.id,
@@ -37,8 +49,12 @@ def checkout_order():
         status="unpaid"
     )
     db.session.add(payment)
-
     db.session.commit()
+
+    from app.models import User
+    user = User.query.get(user_id)
+    if user and user.email:
+        send_order_confirmation(user.email, order_summary)
 
     return jsonify({"message": "Order successfully created", "order_id": new_order.id}), 201
 

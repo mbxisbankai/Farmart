@@ -12,6 +12,7 @@ pillow = "*"
 flask-bcrypt = "*"
 flask-restful = "*"
 flask-jwt-extended = "*"
+sendgrid = "*"
 
 [dev-packages]
 
