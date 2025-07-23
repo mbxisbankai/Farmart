@@ -24,6 +24,11 @@ def get_animals():
     animals = [animal.to_dict() for animal in query.all()]
     return jsonify(animals), 200
 
+@animal_bp.route('/<int:id>', methods=['GET'])
+def get_animal(id):
+    animal = Animal.query.get_or_404(id)
+    return jsonify(animal.to_dict()), 200
+
 
 @animal_bp.route('/', methods=['POST'])
 def create_animal():
