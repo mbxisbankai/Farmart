@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from app.models.user import User
-from server.app.run import db
+from app.config import db, jwt
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 
@@ -21,7 +21,7 @@ def register_user():
 
     # Create user
     user = User(username=username, email=email, is_admin=is_admin)
-    user.set_password(password)
+    user.password = password
 
     db.session.add(user)
     db.session.commit()
@@ -32,20 +32,22 @@ def register_user():
 # LOGIN
 def login_user():
     data = request.get_json()
-    username_or_email = data.get("username_or_email")
+    username = data.get("username")
+    email = data.get("email")
     password = data.get("password")
 
-    if not username_or_email or not password:
+    identifier = username or email
+
+    if not identifier or not password:
         return jsonify({"error": "Missing credentials"}), 400
 
-    # Find user
     user = User.query.filter(
-        (User.username == username_or_email) | (User.email == username_or_email)
+        (User.username == identifier) | (User.email == identifier)
     ).first()
 
     # Validate password
-    if user and user.check_password(password):
-        access_token = create_access_token(identity=user.id)
+    if user and user.authenticate(password):
+        access_token = create_access_token(identity=str(user.id))
         return jsonify({
             "message": "Login successful",
             "token": access_token,
