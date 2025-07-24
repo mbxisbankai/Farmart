@@ -1,9 +1,7 @@
-# utils/decorators.py
 from functools import wraps
-from flask_jwt_extended import verify_jwt_in_request
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from flask import jsonify
 from app.models.user import User
-from flask_jwt_extended import get_jwt_identity
 
 def admin_required(fn):
     @wraps(fn)

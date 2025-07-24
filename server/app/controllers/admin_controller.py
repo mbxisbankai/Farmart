@@ -13,16 +13,6 @@ def get_all_users():
         } for u in users
     ]), 200
 
-def toggle_admin(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    user.is_admin = not user.is_admin
-    db.session.commit()
-    return jsonify({"message": f"User admin status changed to {user.is_admin}"}), 200
-
-
 def get_user_by_id(user_id):
     user = User.query.get(user_id)
     if not user:
@@ -34,3 +24,12 @@ def get_user_by_id(user_id):
         "email": user.email,
         "is_admin": user.is_admin
     }), 200
+
+def toggle_admin(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    user.is_admin = not user.is_admin
+    db.session.commit()
+    return jsonify({"message": f"User admin status changed to {user.is_admin}"}), 200

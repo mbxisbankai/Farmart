@@ -18,10 +18,10 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
 
-    from app.routes.auth_routes import auth_bp
-    from app.routes.admin_routes import admin_bp
-
-    app.register_blueprint(auth_bp)
+    from app.models import user  # This ensures models are registered
+    from app.controllers.auth_controller import auth_bp
+    from app.routes.admin_routes import admin_bp  # ✅ Correct
     app.register_blueprint(admin_bp)
+    app.register_blueprint(auth_bp)
 
     return app

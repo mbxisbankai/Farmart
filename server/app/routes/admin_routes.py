@@ -3,7 +3,7 @@ from app.controllers.admin_controller import get_all_users, toggle_admin, get_us
 from app.utils.decorators import admin_required
 from flask_jwt_extended import jwt_required
 
-admin_bp = Blueprint("admin_bp", __name__, url_prefix="/api/admin")
+admin_bp = Blueprint("admin_bp", __name__, url_prefix="/admin")
 
 @admin_bp.route("/users", methods=["GET"])
 @jwt_required()

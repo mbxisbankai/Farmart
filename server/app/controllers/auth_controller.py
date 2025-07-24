@@ -1,75 +1,75 @@
-from flask import request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from app.models.user import User
 from app import db
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+import jwt
+import datetime
 
+auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-# REGISTER
-def register_user():
+@auth_bp.route('/register', methods=['POST'])
+def register():
     data = request.get_json()
-    username = data.get("username")
-    email = data.get("email")
-    password = data.get("password")
-    is_admin = data.get("is_admin", False)  # 👈 Optional admin flag
 
-    # Validation
-    if not all([username, email, password]):
+    if not data or not all(k in data for k in ("username", "email", "password")):
         return jsonify({"error": "Missing fields"}), 400
 
-    if User.query.filter((User.username == username) | (User.email == email)).first():
-        return jsonify({"error": "Username or email already taken"}), 409
+    if User.query.filter((User.username == data["username"]) | (User.email == data["email"])).first():
+        return jsonify({"error": "User already exists"}), 409
 
-    # Create user
-    user = User(username=username, email=email, is_admin=is_admin)
-    user.set_password(password)
+    user = User(
+        username=data["username"],
+        email=data["email"],
+    )
+    user.password = data["password"]  # triggers the setter which hashes the password
 
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({"message": "User registered successfully"}), 201
+    return jsonify({"message": "User registered", "user": user.to_dict()}), 201
 
-
-# LOGIN
-def login_user():
+@auth_bp.route('/login', methods=['POST'])
+def login():
     data = request.get_json()
-    username_or_email = data.get("username_or_email")
-    password = data.get("password")
 
-    if not username_or_email or not password:
-        return jsonify({"error": "Missing credentials"}), 400
+    if not data or not all(k in data for k in ("email", "password")):
+        return jsonify({"error": "Missing fields"}), 400
 
-    # Find user
-    user = User.query.filter(
-        (User.username == username_or_email) | (User.email == username_or_email)
-    ).first()
+    user = User.query.filter_by(email=data["email"]).first()
 
-    # Validate password
-    if user and user.check_password(password):
-        access_token = create_access_token(identity=user.id)
+    if user and user.check_password(data["password"]):
+        payload = {
+            "sub": str(user.id),
+            "user_id": user.id,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        }
+        token = jwt.encode(payload, current_app.config["SECRET_KEY"], algorithm="HS256")
+
         return jsonify({
             "message": "Login successful",
-            "token": access_token,
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "is_admin": user.is_admin
-            }
+            "token": token,
+            "user": user.to_dict()
         }), 200
 
     return jsonify({"error": "Invalid credentials"}), 401
 
+@auth_bp.route('/profile', methods=['GET'])
+def profile():
+    auth_header = request.headers.get("Authorization")
 
-@jwt_required()
-def get_profile():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Token is missing or invalid"}), 401
 
-    return jsonify({
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "is_admin": user.is_admin
-    }), 200
+    token = auth_header.split(" ")[1]
+
+    try:
+        data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+        user = User.query.get(data["user_id"])
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        return jsonify({"user": user.to_dict()}), 200
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
