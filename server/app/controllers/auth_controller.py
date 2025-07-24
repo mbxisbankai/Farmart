@@ -5,7 +5,8 @@ from flask_jwt_extended import (
     jwt_required
 )
 from app.models.user import User
-from app import db
+from app.config import db, jwt
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 
 # === REGISTER ===
@@ -22,12 +23,13 @@ def register_user():
     if User.query.filter((User.username == username) | (User.email == email)).first():
         return jsonify({"error": "Username or email already taken"}), 409
 
-    try:
-        user = User(username=username, email=email, is_admin=is_admin)
-        user.password = password  # uses @password.setter in User model
+    # Create user
+    user = User(username=username, email=email, is_admin=is_admin)
+    user.password = password
 
-        db.session.add(user)
-        db.session.commit()
+    db.session.add(user)
+    db.session.commit()
+    
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "Registration failed", "details": str(e)}), 500
@@ -38,20 +40,25 @@ def register_user():
 # === LOGIN ===
 def login_user():
     data = request.get_json()
-    print("Received login data:", data)  # ✅ Debug
-
+    print("Received login data:", data)
+    
     username = data.get("username")
+    email = data.get("email")
     password = data.get("password")
 
-    if not username or not password:
-        return jsonify({"error": "Missing username or password"}), 400
+    identifier = username or email
+
+    if not identifier or not password:
+        return jsonify({"error": "Missing credentials"}), 400
 
     user = User.query.filter(
-        (User.username == username) | (User.email == username)
+        (User.username == identifier) | (User.email == identifier)
     ).first()
 
-    if user and user.check_password(password):
-        access_token = create_access_token(identity=user.id)
+    # Validate password
+    if user and user.authenticate(password):
+        access_token = create_access_token(identity=str(user.id))
+
         return jsonify({
             "message": "Login successful",
             "access_token": access_token,

@@ -1,6 +1,6 @@
 from flask import jsonify
 from app.models.user import User
-from app import db
+from app.config import db
 
 def get_all_users():
     users = User.query.all()
