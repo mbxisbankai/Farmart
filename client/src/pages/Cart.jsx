@@ -1,104 +1,123 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Cart = () => {
+  const { user } = useAuth();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const userId = localStorage.getItem('user_id');
+  const userId = user?.id;
 
   useEffect(() => {
-    if (!userId) {
-      setError('User not logged in');
-      setLoading(false);
-      return;
-    }
-    fetch(`/cart/?user_id=${userId}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch cart');
-        }
-        return res.json();
-      })
-      .then((data) => {
+    const fetchCart = async () => {
+      if (!userId) {
+        setError('User not logged in');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/cart/?user_id=${userId}`);
+        if (!res.ok) throw new Error('Failed to fetch cart');
+
+        const data = await res.json();
         setCartItems(data);
-        setLoading(false);
-      })
-      .catch((err) => {
+        if (data.length === 0) {
+          setError(null);
+        }
+      } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchCart();
   }, [userId]);
 
-  const removeItem = (cartId) => {
-    fetch(`/cart/${cartId}`, {
-      method: 'DELETE',
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to remove item');
-        }
-        setCartItems(cartItems.filter((item) => item.cart_id !== cartId));
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
+  const removeItem = async (cartId) => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/cart/${cartId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to remove item');
+      setCartItems(cartItems.filter((item) => item.cart_id !== cartId));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const clearCart = () => {
-    fetch(`/cart/clear?user_id=${userId}`, {
-      method: 'DELETE',
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to clear cart');
-        }
-        setCartItems([]);
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
+  const clearCart = async () => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/cart/clear?user_id=${userId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to clear cart');
+      setCartItems([]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const checkout = () => {
-    fetch(`/cart/checkout?user_id=${userId}`, {
-      method: 'POST',
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Checkout failed');
-        }
-        return res.json();
-      })
-      .then((data) => {
-        alert(data.message);
-        setCartItems([]);
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
+  const checkout = async () => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/cart/checkout?user_id=${userId}`, { method: 'POST' });
+      if (!res.ok) throw new Error('Checkout failed');
+      const data = await res.json();
+      alert(data.message || 'Checkout successful');
+      setCartItems([]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
   };
+
+  const total = cartItems.reduce((sum, item) => sum + (item.animal?.price || 0), 0);
 
   if (loading) return <div>Loading cart...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div className="text-danger">Error: {error}</div>;
 
   return (
-    <div>
-      <h1>Your Cart</h1>
-      {cartItems.length === 0 ? (
+    <div className="container mt-4">
+      <h2>Your Cart</h2>
+
+      {cartItems.length === 0 && !error ? (
         <p>Your cart is empty.</p>
       ) : (
         <>
-          <ul>
+          <ul className="list-group mb-3">
             {cartItems.map((item) => (
-              <li key={item.cart_id}>
-                {item.animal.name} - ${item.animal.price.toFixed(2)}{' '}
-                <button onClick={() => removeItem(item.cart_id)}>Remove</button>
+              <li key={item.cart_id} className="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  {item.animal?.name || 'Unnamed'} - ${item.animal?.price?.toFixed(2) || '0.00'}
+                </div>
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => removeItem(item.cart_id)}
+                  disabled={actionLoading}
+                >
+                  Remove
+                </button>
               </li>
             ))}
           </ul>
-          <button onClick={clearCart}>Clear Cart</button>
-          <button onClick={checkout}>Checkout</button>
+
+          <h4>Total: ${total.toFixed(2)}</h4>
+
+          <div className="d-flex gap-2 mt-3">
+            <button className="btn btn-warning" onClick={clearCart} disabled={actionLoading}>
+              {actionLoading ? 'Clearing...' : 'Clear Cart'}
+            </button>
+            <button className="btn btn-success" onClick={checkout} disabled={actionLoading}>
+              {actionLoading ? 'Processing...' : 'Checkout'}
+            </button>
+          </div>
         </>
       )}
     </div>

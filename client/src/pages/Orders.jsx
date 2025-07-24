@@ -1,62 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import '../styles.css';
 
-const Orders = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchOrders = () => {
-    fetch('/order_bp/my-orders', {
-      credentials: 'include',
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch orders');
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setOrders(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  if (loading) return <div>Loading orders...</div>;
-  if (error) return <div>Error: {error}</div>;
-
+const OrderPage = () => {
   return (
-    <div>
-      <h1>My Orders</h1>
-      {orders.length === 0 ? (
-        <p>You have no orders.</p>
-      ) : (
-        <ul>
-          {orders.map((order) => (
-            <li key={order.id}>
-              <strong>Order ID:</strong> {order.id} <br />
-              <strong>Status:</strong> {order.status} <br />
-              <strong>Total Amount:</strong> ${order.total_amount.toFixed(2)} <br />
-              <strong>Created At:</strong> {new Date(order.created_at).toLocaleString()} <br />
-              <strong>Items:</strong>
-              <ul>
-                {order.animals.map((animal) => (
-                  <li key={animal.id}>{animal.name} - ${animal.price.toFixed(2)}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="container py-5">
+      <h2 className="mb-4 text-success">Checkout</h2>
+
+      <form className="bg-light p-4 rounded border shadow-sm">
+        <div className="mb-3">
+          <label className="form-label">Full Name</label>
+          <input type="text" className="form-control" placeholder="John Doe" />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Phone Number</label>
+          <input type="tel" className="form-control" placeholder="+254..." />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Delivery Address</label>
+          <input type="text" className="form-control" placeholder="123 Farm Lane, Nairobi" />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Additional Notes</label>
+          <textarea className="form-control" rows="3"></textarea>
+        </div>
+
+        <button type="submit" className="btn btn-farm w-100">Place Order</button>
+      </form>
     </div>
   );
 };
 
-export default Orders;
+export default OrderPage;
