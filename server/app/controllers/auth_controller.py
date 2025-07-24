@@ -1,20 +1,24 @@
 from flask import request, jsonify
+from flask_jwt_extended import (
+    create_access_token,
+    get_jwt_identity,
+    jwt_required
+)
 from app.models.user import User
 from app.config import db, jwt
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 
-# REGISTER
+# === REGISTER ===
 def register_user():
     data = request.get_json()
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
-    is_admin = data.get("is_admin", False)  # 👈 Optional admin flag
+    is_admin = data.get("is_admin", False)
 
-    # Validation
     if not all([username, email, password]):
-        return jsonify({"error": "Missing fields"}), 400
+        return jsonify({"error": "Missing required fields"}), 400
 
     if User.query.filter((User.username == username) | (User.email == email)).first():
         return jsonify({"error": "Username or email already taken"}), 409
@@ -25,13 +29,19 @@ def register_user():
 
     db.session.add(user)
     db.session.commit()
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Registration failed", "details": str(e)}), 500
 
     return jsonify({"message": "User registered successfully"}), 201
 
 
-# LOGIN
+# === LOGIN ===
 def login_user():
     data = request.get_json()
+    print("Received login data:", data)
+    
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
@@ -48,9 +58,10 @@ def login_user():
     # Validate password
     if user and user.authenticate(password):
         access_token = create_access_token(identity=str(user.id))
+
         return jsonify({
             "message": "Login successful",
-            "token": access_token,
+            "access_token": access_token,
             "user": {
                 "id": user.id,
                 "username": user.username,
@@ -62,10 +73,12 @@ def login_user():
     return jsonify({"error": "Invalid credentials"}), 401
 
 
+# === GET PROFILE ===
 @jwt_required()
 def get_profile():
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
+
     if not user:
         return jsonify({"error": "User not found"}), 404
 
