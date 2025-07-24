@@ -60,4 +60,24 @@ function Login() {
             id="password"
             className="form-control"
             value={password}
-            onChange={(e)
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit" className="btn btn-success">
+          Login
+        </button>
+      </form>
+
+      {/* Register link */}
+      <p className="mt-3">
+        Don&apos;t have an account?{" "}
+        <Link to="/register" className="text-success fw-semibold">
+          Register here
+        </Link>
+      </p>
+    </div>
+  );
+}
+
+export default Login;

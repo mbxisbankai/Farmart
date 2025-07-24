@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function Register() {
   const [username, setUsername] = useState('');
@@ -63,7 +63,7 @@ function Register() {
         </div>
 
         <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email (optional)</label>
+          <label htmlFor="email" className="form-label">Email</label>
           <input
             type="email"
             id="email"
@@ -99,6 +99,11 @@ function Register() {
 
         <button type="submit" className="btn btn-success">Register</button>
       </form>
+
+      <p className="mt-3">
+        Already have an account?{' '}
+        <Link to="/login" className="text-success fw-semibold">Login here</Link>
+      </p>
     </div>
   );
 }
