@@ -1,7 +1,8 @@
-from app.app import app
-from app.config import db
+from app import create_app, db
 
 from app.models import User, Farmer, Animal, Order, Payment, Cart
+
+app = create_app()
 
 with app.app_context():
     print("Dropping and creating tables...")
@@ -15,8 +16,10 @@ with app.app_context():
     db.session.commit()
 
     print("Seeding users...")
-    user1 = User(username="user1", email="user1@example.com", password="hashedpassword1")
-    user2 = User(username="user2", email="user2@example.com", password="hashedpassword2")
+    user1 = User(username="user1", email="user1@example.com")
+    user1.password = "hashedpassword1"
+    user2 = User(username="user2", email="user2@example.com")
+    user2.password = "hashedpassword2"
     db.session.add_all([user1, user2])
     db.session.commit()
 
