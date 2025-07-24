@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,12 +23,15 @@ function Login() {
       });
 
       const data = await response.json();
-
+      console.log("Login response:", data);
       if (response.ok) {
         localStorage.setItem("access_token", data.access_token);
+        if (data.user) {
+          login(data.user);
+        }
         navigate("/");
       } else {
-        setError(data.msg || "Login failed");
+        setError(data.error || data.message || "Login failed");
       }
     } catch (err) {
       setError("Login failed: " + err.message);
@@ -39,9 +44,7 @@ function Login() {
       {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="username" className="form-label">
-            Username
-          </label>
+          <label htmlFor="username" className="form-label">Username</label>
           <input
             type="text"
             id="username"
@@ -51,10 +54,9 @@ function Login() {
             required
           />
         </div>
+
         <div className="mb-3">
-          <label htmlFor="password" className="form-label">
-            Password
-          </label>
+          <label htmlFor="password" className="form-label">Password</label>
           <input
             type="password"
             id="password"
@@ -64,12 +66,10 @@ function Login() {
             required
           />
         </div>
-        <button type="submit" className="btn btn-success">
-          Login
-        </button>
+
+        <button type="submit" className="btn btn-success">Login</button>
       </form>
 
-      {/* Register link */}
       <p className="mt-3">
         Don&apos;t have an account?{" "}
         <Link to="/register" className="text-success fw-semibold">
