@@ -1,0 +1,18 @@
+
+.btn-farm {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+.btn-farm:hover {
+  background-color: #388E3C;
+}
+
+body {
+  background-color: #F5F5DC;
+}
+
+.table-success {
+  background-color: #e0f2e9;
+}

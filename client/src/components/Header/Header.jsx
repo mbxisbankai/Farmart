@@ -1,10 +1,10 @@
 // src/components/Header/Header.jsx
 import React from "react";
 import { FaShoppingCart, FaUserCircle } from "react-icons/fa";
-import { useAuth } from "../../contexts/AuthContext"; // ✅ Correct import path
+import { useAuth } from "../../contexts/AuthContext"; 
 
 export default function Header() {
-  const { user, logout } = useAuth(); // ✅ Get user & logout from context
+  const { user, logout } = useAuth(); 
 
   return (
     <header className="w-100 shadow-sm border-bottom">
