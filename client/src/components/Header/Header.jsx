@@ -1,7 +1,11 @@
+// src/components/Header/Header.jsx
 import React from "react";
-import { FaShoppingCart } from "react-icons/fa";
+import { FaShoppingCart, FaUserCircle } from "react-icons/fa";
+import { useAuth } from "../../contexts/AuthContext"; // ✅ Correct import path
 
 export default function Header() {
+  const { user, logout } = useAuth(); // ✅ Get user & logout from context
+
   return (
     <header className="w-100 shadow-sm border-bottom">
       {/* Top Info Bar */}
@@ -25,9 +29,25 @@ export default function Header() {
 
         {/* Account and Cart */}
         <div className="d-flex align-items-center gap-3">
-          <button className="btn btn-link text-success text-decoration-none p-0 fw-semibold">
-            Sign In
-          </button>
+          {user ? (
+            <div className="d-flex align-items-center gap-3">
+              <FaUserCircle className="text-success fs-4" />
+              <span className="fw-semibold text-success">{user.username}</span>
+              <button
+                className="btn btn-sm btn-outline-danger"
+                onClick={logout}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <a
+              href="/login"
+              className="btn btn-link text-success text-decoration-none p-0 fw-semibold"
+            >
+              Sign In
+            </a>
+          )}
           <FaShoppingCart className="text-success fs-4" />
         </div>
       </div>
