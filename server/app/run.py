@@ -1,13 +1,12 @@
-from flask import Flask
-from app.config import db, migrate, Config, Api
+from app import create_app
+from app.config import Config
 from app.models import user, cart, animal, order, payment, farmer
 from app.controllers.order_controller import OrderController, OrderControllerOne
 from app.routes import animal_bp, user_bp, cart_bp, farmer_bp, order_bp, PaymentController, PaymentControllerOne
+from flask_restful import Api
 
-app = Flask(__name__)
+app = create_app()
 app.config.from_object(Config)
-db.init_app(app)
-migrate.init_app(app, db)
 api = Api(app)
 
 app.register_blueprint(animal_bp)
