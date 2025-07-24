@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from app.models.user import User
-from server.app.run import db
+from app.run import db
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 
