@@ -1,34 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const userId = user?.id;
-
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
+    // Wait until user is loaded
+    if (!user) return;
 
     const fetchCart = async () => {
       try {
-        const res = await fetch(`/api/cart/?user_id=${userId}`);
+        const res = await fetch(`/api/cart/?user_id=${user.id}`);
         if (!res.ok) throw new Error('Failed to fetch cart');
+
         const data = await res.json();
         setCartItems(data);
-        if (data.length === 0) {
-          setError('Your cart is empty.');
-        } else {
-          setError(null);
-        }
+        setError(null);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -37,14 +28,14 @@ const Cart = () => {
     };
 
     fetchCart();
-  }, [user, userId, navigate]);
+  }, [user]);
 
   const removeItem = async (cartId) => {
     setActionLoading(true);
     try {
       const res = await fetch(`/api/cart/${cartId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to remove item');
-      setCartItems((prev) => prev.filter((item) => item.cart_id !== cartId));
+      setCartItems(cartItems.filter((item) => item.cart_id !== cartId));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -52,37 +43,92 @@ const Cart = () => {
     }
   };
 
-  if (loading) return <p>Loading cart...</p>;
+  const clearCart = async () => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/cart/clear?user_id=${user.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to clear cart');
+      setCartItems([]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const checkout = async () => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/cart/checkout?user_id=${user.id}`, {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error('Checkout failed');
+      const data = await res.json();
+      alert(data.message || 'Checkout successful');
+      setCartItems([]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const total = cartItems.reduce((sum, item) => sum + (item.animal?.price || 0), 0);
+
+  if (!user) return <div>Loading user...</div>;
+  if (loading) return <div>Loading cart...</div>;
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Your Cart</h1>
+    <div className="container mt-4">
+      <h2>Your Cart</h2>
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
+      {error && <div className="alert alert-danger">Error: {error}</div>}
 
-      {cartItems.length > 0 ? (
-        <ul className="space-y-4">
-          {cartItems.map((item) => (
-            <li
-              key={item.cart_id}
-              className="flex justify-between items-center p-4 border rounded"
-            >
-              <div>
-                <p className="font-medium">{item.product_name || 'Item'}</p>
-                <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-              </div>
-              <button
-                onClick={() => removeItem(item.cart_id)}
-                disabled={actionLoading}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50"
-              >
-                {actionLoading ? 'Removing...' : 'Remove'}
-              </button>
-            </li>
-          ))}
-        </ul>
+      {cartItems.length === 0 && !error ? (
+        <p>Your cart is empty.</p>
       ) : (
-        !error && <p>Your cart is currently empty.</p>
+        <>
+          <ul className="list-group mb-3">
+            {cartItems.map((item) => (
+              <li
+                key={item.cart_id}
+                className="list-group-item d-flex justify-content-between align-items-center"
+              >
+                <div>
+                  {item.animal?.name || 'Unnamed'} - ${item.animal?.price?.toFixed(2) || '0.00'}
+                </div>
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => removeItem(item.cart_id)}
+                  disabled={actionLoading}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <h4>Total: ${total.toFixed(2)}</h4>
+
+          <div className="d-flex gap-2 mt-3">
+            <button
+              className="btn btn-warning"
+              onClick={clearCart}
+              disabled={actionLoading}
+            >
+              {actionLoading ? 'Clearing...' : 'Clear Cart'}
+            </button>
+            <button
+              className="btn btn-success"
+              onClick={checkout}
+              disabled={actionLoading}
+            >
+              {actionLoading ? 'Processing...' : 'Checkout'}
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

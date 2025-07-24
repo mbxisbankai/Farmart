@@ -1,7 +1,12 @@
-from app.app import app
-from app.config import db
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from app import create_app, db
 
 from app.models import User, Farmer, Animal, Order, Payment, Cart
+
+app = create_app()
 
 with app.app_context():
     print("Dropping and creating tables...")
@@ -15,8 +20,10 @@ with app.app_context():
     db.session.commit()
 
     print("Seeding users...")
-    user1 = User(username="user1", email="user1@example.com", password="hashedpassword1")
-    user2 = User(username="user2", email="user2@example.com", password="hashedpassword2")
+    user1 = User(username="user1", email="user1@example.com")
+    user1.password = "hashedpassword1"
+    user2 = User(username="user2", email="user2@example.com")
+    user2.password = "hashedpassword2"
     db.session.add_all([user1, user2])
     db.session.commit()
 
@@ -44,5 +51,18 @@ with app.app_context():
     cart1 = Cart(user_id=user2.id, animal_id=animal2.id)
     db.session.add(cart1)
     db.session.commit()
+
+    print("Adding user with ID 3 and cart item...")
+    user3 = User(username="Pauline", email="user3@example.com")
+    user3.password = "testing"
+    db.session.add(user3)
+    db.session.commit()
+
+    # Add a cart item for user3
+    animal_for_cart = Animal.query.filter_by(is_sold=False).first()
+    if animal_for_cart:
+        cart_for_user3 = Cart(user_id=user3.id, animal_id=animal_for_cart.id)
+        db.session.add(cart_for_user3)
+        db.session.commit()
 
     print("Seeding complete ✅")
