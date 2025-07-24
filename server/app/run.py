@@ -5,7 +5,7 @@ from app.controllers.order_controller import OrderController, OrderControllerOne
 from app.routes import auth_bp, animal_bp, user_bp, cart_bp, farmer_bp, order_bp, PaymentController, PaymentControllerOne
 
 
-app = create_app()
+app = Flask(__name__)
 app.config.from_object(Config)
 
 api = Api(app)
