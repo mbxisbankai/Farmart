@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from app.models.user import User
-from app.run import db
+from app import db
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 
@@ -20,11 +20,15 @@ def register_user():
         return jsonify({"error": "Username or email already taken"}), 409
 
     # Create user
-    user = User(username=username, email=email, is_admin=is_admin)
-    user.set_password(password)
+    try:
+        user = User(username=username, email=email, is_admin=is_admin)
+        user.password = password
 
-    db.session.add(user)
-    db.session.commit()
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Registration failed", "details": str(e)}), 500
 
     return jsonify({"message": "User registered successfully"}), 201
 
