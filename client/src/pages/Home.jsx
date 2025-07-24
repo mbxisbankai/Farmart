@@ -1,7 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import '../styles.css';
 
 function Home() {
+  const categories = [
+    { name: "Cattle", path: "/animals/cattle" },
+    { name: "Goats", path: "/animals/goats" },
+    { name: "Sheep", path: "/animals/sheep" },
+    { name: "Poultry", path: "/animals/poultry" },
+    { name: "Pigs", path: "/animals/pigs" },
+    { name: "Farm Equipment", path: "/equipment" },
+  ];
+
   return (
     <div>
 
@@ -43,13 +53,18 @@ function Home() {
         <div className="container">
           <h2 className="text-center mb-4 text-success">Categories</h2>
           <div className="row g-3">
-            {["Cattle", "Goats", "Sheep", "Poultry", "Pigs", "Farm Equipment"].map(item => (
-              <div className="col-6 col-md-4 col-lg-2 text-center" key={item}>
-                <div className="card border-0 shadow-sm h-100">
-                  <div className="card-body">
-                    <h6 className="text-success">{item}</h6>
+            {categories.map(({ name, path }) => (
+              <div className="col-6 col-md-4 col-lg-2 text-center" key={name}>
+                <Link
+                  to={path}
+                  className="text-decoration-none"
+                >
+                  <div className="card border-0 shadow-sm h-100 category-card">
+                    <div className="card-body d-flex align-items-center justify-content-center">
+                      <h6 className="text-success m-0">{name}</h6>
+                    </div>
                   </div>
-                </div>
+                </Link>
               </div>
             ))}
           </div>

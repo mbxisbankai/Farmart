@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.models.cart import Cart, db
 from app.models.animal import Animal
 
-cart_bp = Blueprint('cart_bp', __name__, url_prefix='/cart')
+cart_bp = Blueprint('cart_bp', __name__, url_prefix='/api/cart')
 
 @cart_bp.route('/', methods=['POST'])
 def add_to_cart():

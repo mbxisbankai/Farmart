@@ -16,7 +16,9 @@ export default function Header() {
       {/* Main Header */}
       <div className="d-flex align-items-center justify-content-between px-4 py-3 bg-white">
         {/* Logo */}
-        <div className="h4 text-success fw-bold m-0">FARMART</div>
+        <Link to="/" className="h4 text-success fw-bold m-0 text-decoration-none">
+          FARMART
+        </Link>
 
         {/* Search Bar */}
         <div className="flex-grow-1 mx-3">
@@ -41,35 +43,39 @@ export default function Header() {
               </button>
             </div>
           ) : (
-            <a
-              href="/login"
+            <Link
+              to="/login"
               className="btn btn-link text-success text-decoration-none p-0 fw-semibold"
             >
               Sign In
-            </a>
+            </Link>
           )}
-          <FaShoppingCart className="text-success fs-4" />
+
+          <Link to="/cart" className="text-success fs-4">
+            <FaShoppingCart />
+          </Link>
         </div>
       </div>
 
       {/* Navigation Menu */}
       <nav className="d-flex flex-wrap gap-2 px-4 py-2 bg-success-subtle border-top border-bottom">
         {[
-          "All Animals",
-          "Cattle",
-          "Goats",
-          "Sheep",
-          "Poultry",
-          "Pigs",
-          "Equipment",
-          "Services",
+          { label: "All Animals", path: "/animals" },
+          { label: "Cattle", path: "/animals/cattle" },
+          { label: "Goats", path: "/animals/goats" },
+          { label: "Sheep", path: "/animals/sheep" },
+          { label: "Poultry", path: "/animals/poultry" },
+          { label: "Pigs", path: "/animals/pigs" },
+          { label: "Equipment", path: "/equipment" },
+          { label: "Services", path: "/services" },
         ].map((item) => (
-          <button
-            key={item}
-            className="btn btn-sm btn-outline-success px-3 py-1 rounded-pill"
+          <Link
+            key={item.label}
+            to={item.path}
+            className="btn btn-sm btn-outline-success px-3 py-1 rounded-pill text-decoration-none"
           >
-            {item}
-          </button>
+            {item.label}
+          </Link>
         ))}
       </nav>
     </header>
