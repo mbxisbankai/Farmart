@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from app.config import db, migrate, jwt, Config, Api
 from app.models import user, cart, animal, order, payment, farmer
 from app.controllers.order_controller import OrderController, OrderControllerOne
@@ -10,6 +11,7 @@ app.config.from_object(Config)
 
 api = Api(app)
 jwt.init_app(app)
+CORS(app, supports_credentials=True, origins=["http://localhost:5173", "<deployed-frontend-url>"])
 
 app.register_blueprint(animal_bp)
 app.register_blueprint(user_bp)
