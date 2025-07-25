@@ -38,4 +38,3 @@ class User(db.Model):
     carts = db.relationship('Cart', back_populates='user', lazy=True)
     orders = db.relationship("Order", back_populates="user", cascade="all, delete")
     payments = db.relationship("Payment", back_populates="user", cascade="all, delete")
-
