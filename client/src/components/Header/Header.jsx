@@ -1,5 +1,6 @@
 // src/components/Header/Header.jsx
 import React from "react";
+import {Link} from "react-router-dom";
 import { FaShoppingCart, FaUserCircle } from "react-icons/fa";
 import { useAuth } from "../../contexts/AuthContext"; 
 
