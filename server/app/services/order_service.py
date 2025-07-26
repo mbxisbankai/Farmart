@@ -1,6 +1,6 @@
 from app.models.cart import Cart
 from app.models.order import Order
-from app.config import db
+from app.extensions import db
 
 def checkout_cart(user_id):
     cart = Cart.query.filter_by(user_id=user_id).first()

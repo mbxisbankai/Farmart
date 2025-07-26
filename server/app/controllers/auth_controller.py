@@ -5,8 +5,7 @@ from flask_jwt_extended import (
     jwt_required
 )
 from app.models.user import User
-from app.config import db, jwt
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from app.extensions import db
 
 
 # === REGISTER ===
@@ -23,21 +22,17 @@ def register_user():
     if User.query.filter((User.username == username) | (User.email == email)).first():
         return jsonify({"error": "Username or email already taken"}), 409
 
-    # Create user
     user = User(username=username, email=email, is_admin=is_admin)
-    user.password = password
+    user.password = password  # This uses your password setter
 
     db.session.add(user)
     db.session.commit()
 
     return jsonify({"message": "User registered successfully"}), 201
 
-
 # === LOGIN ===
 def login_user():
     data = request.get_json()
-    print("Received login data:", data)
-    
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
@@ -51,10 +46,8 @@ def login_user():
         (User.username == identifier) | (User.email == identifier)
     ).first()
 
-    # Validate password
     if user and user.authenticate(password):
         access_token = create_access_token(identity=str(user.id))
-
         return jsonify({
             "message": "Login successful",
             "access_token": access_token,
@@ -67,7 +60,6 @@ def login_user():
         }), 200
 
     return jsonify({"error": "Invalid credentials"}), 401
-
 
 # === GET PROFILE ===
 @jwt_required()

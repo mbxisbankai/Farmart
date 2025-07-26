@@ -1,6 +1,6 @@
-from app.config import db
+from app.extensions import db
+
 from datetime import datetime
-from app.models.order import Order
 
 class Payment(db.Model):
     __tablename__ = 'payments'
@@ -8,6 +8,7 @@ class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    farmer_id = db.Column(db.Integer, db.ForeignKey("farmers.id"))  # NEW
     amount = db.Column(db.Float, nullable=False)
     method = db.Column(db.String, nullable=False)
     status = db.Column(db.String, nullable=False, default="unpaid")
@@ -15,12 +16,16 @@ class Payment(db.Model):
 
     user = db.relationship("User", back_populates="payments")
     order = db.relationship("Order", back_populates="payment")
+    farmer = db.relationship("Farmer", back_populates="payments")  # NEW
 
     def to_dict(self):
         return {
             "id": self.id,
             "order_id": self.order_id,
             "user_id": self.user_id,
+            "farmer_id": self.farmer_id,
+            "amount": self.amount,
             "method": self.method,
-            "status": self.status
+            "status": self.status,
+            "created_at": self.created_at.isoformat()
         }

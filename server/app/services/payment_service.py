@@ -1,6 +1,6 @@
 from app.models.payment import Payment
 from app.models.order import Order
-from app.config import db
+from app.extensions import db
 from datetime import datetime
 
 def pay_order(order_id, payment_data):

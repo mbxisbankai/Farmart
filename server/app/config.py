@@ -1,21 +1,26 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_restful import Api
-from flask_bcrypt import Bcrypt
-from dotenv import load_dotenv
-from flask_jwt_extended import JWTManager
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
 
-db = SQLAlchemy()
-bcrypt = Bcrypt()
-migrate = Migrate()
-jwt = JWTManager()
-
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_URI')
-    SECRET_KEY = os.getenv('SECRET_KEY')
+    # Flask core config
+    SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
+    FLASK_ENV = os.getenv('FLASK_ENV', 'development')
+    DEBUG = os.getenv('DEBUG', True)
+
+    # SQLAlchemy config
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_URI', 'sqlite:///dev.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET")
-    
+
+    # JWT config
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-jwt-key")
+    JWT_ACCESS_TOKEN_EXPIRES = 3600  # seconds (1 hour)
+
+    # Upload config
+    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'app', 'static', 'uploads')
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Max file size: 16MB
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+    # CORS
+    CORS_HEADERS = 'Content-Type'

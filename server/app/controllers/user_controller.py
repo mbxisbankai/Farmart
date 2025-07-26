@@ -1,6 +1,6 @@
 from flask import jsonify
-from app.models import User
-from app.extensions import db
+from app.models import User  # Adjust the import if your User model is elsewhere
+from app.extensions import db    # Ensure this points to your SQLAlchemy instance
 
 def get_all_users():
     users = User.query.all()
@@ -12,14 +12,10 @@ def get_user_by_id(user_id):
         return jsonify({"error": "User not found"}), 404
     return jsonify(user.to_dict()), 200
 
-def toggle_admin(user_id):
+def delete_user(user_id):
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
-
-    user.is_admin = not user.is_admin
+    db.session.delete(user)
     db.session.commit()
-    return jsonify({
-        "message": "User role updated successfully",
-        "user": user.to_dict()
-    }), 200
+    return jsonify({"message": "User deleted"}), 200

@@ -1,22 +1,30 @@
 from flask import Blueprint
-from app.controllers.admin_controller import get_all_users, toggle_admin, get_user_by_id
-from app.utils.decorators import admin_required
 from flask_jwt_extended import jwt_required
+
+from app.controllers.admin_controller import (
+    get_all_users,
+    get_user_by_id,
+    toggle_admin
+)
+from app.utils.decorators import admin_required
 
 admin_bp = Blueprint("admin_bp", __name__, url_prefix="/api/admin")
 
+# ✅ GET /api/admin/users — Get all users
 @admin_bp.route("/users", methods=["GET"])
 @jwt_required()
 @admin_required
 def all_users():
     return get_all_users()
 
+# ✅ GET /api/admin/users/<id> — Get a single user by ID
 @admin_bp.route("/users/<int:user_id>", methods=["GET"])
 @jwt_required()
 @admin_required
 def single_user(user_id):
     return get_user_by_id(user_id)
 
+# ✅ PATCH /api/admin/users/<id>/toggle-admin — Promote or demote user to/from admin
 @admin_bp.route("/users/<int:user_id>/toggle-admin", methods=["PATCH"])
 @jwt_required()
 @admin_required

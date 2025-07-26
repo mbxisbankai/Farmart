@@ -1,10 +1,11 @@
-from app.models.payment import Payment
-from app.utils.core_controllers import CoreController, CoreControllerOne
+from flask import Blueprint
+from app.controllers.payment_controller import (
+    make_payment, get_all_payments, get_payment_by_id
+)
+from app.auth_middleware import jwt_required
 
-class PaymentController(CoreController):
-    def __init__(self):
-        super().__init__(Payment)
+payment_bp = Blueprint("payment", __name__, url_prefix="/api/payments")
 
-class PaymentControllerOne(CoreControllerOne):
-    def __init__(self):
-        super().__init__(Payment)
+payment_bp.route("/", methods=["POST"])(jwt_required(make_payment))
+payment_bp.route("/", methods=["GET"])(jwt_required(get_all_payments))
+payment_bp.route("/<int:payment_id>", methods=["GET"])(jwt_required(get_payment_by_id))

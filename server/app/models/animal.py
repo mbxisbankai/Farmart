@@ -1,4 +1,5 @@
-from app.config import db
+from app.extensions import db
+
 
 class Animal(db.Model):
     __tablename__ = 'animals'
@@ -15,7 +16,7 @@ class Animal(db.Model):
     farmer_id = db.Column(db.Integer, db.ForeignKey("farmers.id"), nullable=False)
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=True)
 
-    carts = db.relationship('Cart', back_populates='animal', cascade='all, delete')
+    carts = db.relationship('Cart', back_populates='animal', cascade="all, delete-orphan")
     farmer = db.relationship("Farmer", back_populates="animals")
     order = db.relationship("Order", back_populates="animals")
 
@@ -31,6 +32,6 @@ class Animal(db.Model):
             "picture_url": self.picture_url,
             "farmer_id": self.farmer_id,
             "order_id": self.order_id,
-            "farmer": {"id": self.farmer.id, "name": self.farmer.name} if self.farmer else None
+            "farmer": self.farmer.to_dict() if self.farmer else None
     }
 

@@ -1,53 +1,20 @@
-from flask import Blueprint, request, jsonify
-from app.models.farmer import Farmer
-from app.models import db
+from flask import Blueprint, jsonify
+from app.controllers.farmer_controller import get_all_farmers, create_farmer
+from flask_jwt_extended import jwt_required
+from app.auth_middleware import role_required
 
-farmer_bp = Blueprint('farmer_bp', __name__, url_prefix='/farmers')
+farmer_bp = Blueprint("farmer", __name__)
 
+@farmer_bp.route("/test")
+def test():
+    return jsonify({"message": "farmer test"})
 
-@farmer_bp.route('/', methods=['GET'])
-def get_farmers():
-    farmers = Farmer.query.all()
-    return jsonify([f.to_dict() for f in farmers]), 200
+@farmer_bp.route("/", methods=["GET"])
+def get_all():
+    return get_all_farmers()
 
-
-@farmer_bp.route('/<int:id>', methods=['GET'])
-def get_farmer(id):
-    farmer = Farmer.query.get_or_404(id)
-    return jsonify(farmer.to_dict()), 200
-
-
-@farmer_bp.route('/', methods=['POST'])
-def create_farmer():
-    data = request.get_json()
-    try:
-        new_farmer = Farmer(
-            name=data['name'],
-            email=data['email'],
-            phone=data['phone']
-        )
-        db.session.add(new_farmer)
-        db.session.commit()
-        return jsonify(new_farmer.to_dict()), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
-@farmer_bp.route('/<int:id>', methods=['PATCH'])
-def update_farmer(id):
-    farmer = Farmer.query.get_or_404(id)
-    data = request.get_json()
-
-    farmer.name = data.get('name', farmer.name)
-    farmer.email = data.get('email', farmer.email)
-    farmer.phone = data.get('phone', farmer.phone)
-
-    db.session.commit()
-    return jsonify(farmer.to_dict()), 200
-
-@farmer_bp.route('/<int:id>', methods=['DELETE'])
-def delete_farmer(id):
-    farmer = Farmer.query.get_or_404(id)
-    db.session.delete(farmer)
-    db.session.commit()
-    return jsonify({'message': 'Farmer deleted'}), 200
+@farmer_bp.route("/", methods=["POST"])
+@jwt_required
+@role_required('farmer')
+def create():
+    return create_farmer()

@@ -1,98 +1,99 @@
 from flask import Blueprint, request, jsonify
-from app.models.cart import Cart, db
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models.cart import Cart
 from app.models.animal import Animal
+from app.models.user import User
+from app.extensions import db
 
-cart_bp = Blueprint('cart_bp', __name__, url_prefix='/api/cart')
+cart_bp = Blueprint("cart_bp", __name__, url_prefix="/api/cart")
 
-@cart_bp.route('/', methods=['POST'])
+# === GET all cart items for current user ===
+@cart_bp.route("/", methods=["GET"])
+@jwt_required()
+def get_cart_items():
+    user_id = get_jwt_identity()
+    cart_items = Cart.query.filter_by(user_id=user_id).all()
+
+    result = []
+    for item in cart_items:
+        animal = Animal.query.get(item.animal_id)
+        result.append({
+            "cart_id": item.id,
+            "animal_id": animal.id,
+            "animal_name": animal.name,
+            "image": animal.image,  # static path
+            "price": animal.price,
+            "quantity": item.quantity
+        })
+
+    return jsonify(result), 200
+
+# === ADD animal to cart ===
+@cart_bp.route("/", methods=["POST"])
+@jwt_required()
 def add_to_cart():
     data = request.get_json()
-    user_id = data.get('user_id')
-    animal_id = data.get('animal_id')
+    user_id = get_jwt_identity()
+    animal_id = data.get("animal_id")
+    quantity = data.get("quantity", 1)
 
-    if not user_id or not animal_id:
-        return jsonify({'error': 'user_id and animal_id are required'}), 400
+    if not animal_id:
+        return jsonify({"error": "Animal ID is required"}), 400
 
-    
-    animal = Animal.query.get(animal_id)
-    if not animal:
-        return jsonify({'error': 'Animal not found'}), 404
-    if animal.is_sold:
-        return jsonify({'error': 'Animal is already sold'}), 400
+    if not Animal.query.get(animal_id):
+        return jsonify({"error": "Animal not found"}), 404
 
-    
+    # Check if already in cart
     existing = Cart.query.filter_by(user_id=user_id, animal_id=animal_id).first()
     if existing:
-        return jsonify({'error': 'Animal already in cart'}), 409
+        existing.quantity += quantity
+    else:
+        new_item = Cart(user_id=user_id, animal_id=animal_id, quantity=quantity)
+        db.session.add(new_item)
 
-    new_item = Cart(user_id=user_id, animal_id=animal_id)
-    db.session.add(new_item)
     db.session.commit()
-    return jsonify(new_item.to_dict()), 201
+    return jsonify({"message": "Animal added to cart"}), 201
 
+# === UPDATE cart item quantity ===
+@cart_bp.route("/<int:cart_id>", methods=["PATCH"])
+@jwt_required()
+def update_cart_item(cart_id):
+    user_id = get_jwt_identity()
+    cart_item = Cart.query.get(cart_id)
 
-@cart_bp.route('/', methods=['GET'])
-def get_user_cart():
-    user_id = request.args.get('user_id')
-    if not user_id:
-        return jsonify({'error': 'user_id is required'}), 400
+    if not cart_item or cart_item.user_id != user_id:
+        return jsonify({"error": "Cart item not found"}), 404
 
-    cart_items = Cart.query.filter_by(user_id=user_id).all()
-    cart_data = []
+    data = request.get_json()
+    quantity = data.get("quantity")
 
-    for item in cart_items:
-        animal = Animal.query.get(item.animal_id)
-        if animal:
-            cart_data.append({
-                "cart_id": item.id,
-                "user_id": item.user_id,
-                "animal": animal.to_dict()
-            })
+    if quantity is None or quantity < 1:
+        return jsonify({"error": "Invalid quantity"}), 400
 
-    return jsonify(cart_data), 200
-
-
-@cart_bp.route('/<int:item_id>', methods=['DELETE'])
-def remove_item(item_id):
-    item = Cart.query.get_or_404(item_id)
-    db.session.delete(item)
+    cart_item.quantity = quantity
     db.session.commit()
-    return jsonify({'message': 'Item removed from cart'}), 200
 
+    return jsonify({"message": "Cart item updated"}), 200
 
-@cart_bp.route('/clear', methods=['DELETE'])
+# === DELETE item from cart ===
+@cart_bp.route("/<int:cart_id>", methods=["DELETE"])
+@jwt_required()
+def delete_cart_item(cart_id):
+    user_id = get_jwt_identity()
+    cart_item = Cart.query.get(cart_id)
+
+    if not cart_item or cart_item.user_id != user_id:
+        return jsonify({"error": "Cart item not found"}), 404
+
+    db.session.delete(cart_item)
+    db.session.commit()
+    return jsonify({"message": "Cart item deleted"}), 200
+
+# === CLEAR entire cart ===
+@cart_bp.route("/clear", methods=["DELETE"])
+@jwt_required()
 def clear_cart():
-    user_id = request.args.get('user_id')
-    if not user_id:
-        return jsonify({'error': 'user_id is required'}), 400
-
-    items = Cart.query.filter_by(user_id=user_id).all()
-    for item in items:
-        db.session.delete(item)
+    user_id = get_jwt_identity()
+    Cart.query.filter_by(user_id=user_id).delete()
     db.session.commit()
-    return jsonify({'message': 'Cart cleared'}), 200
-
-
-@cart_bp.route('/checkout', methods=['POST'])
-def checkout_cart():
-    user_id = request.args.get('user_id')
-    if not user_id:
-        return jsonify({'error': 'user_id is required'}), 400
-
-    cart_items = Cart.query.filter_by(user_id=user_id).all()
-    if not cart_items:
-        return jsonify({'error': 'Cart is empty'}), 400
-
-    sold_animals = []
-    for item in cart_items:
-        animal = Animal.query.get(item.animal_id)
-        if animal and not animal.is_sold:
-            animal.is_sold = True
-            sold_animals.append(animal.to_dict())
-        db.session.delete(item)
-
-    db.session.commit()
-    return jsonify({
-        "message": f"{len(sold_animals)} animals checked out",
-        "sold_animals": sold_animals
-    }), 200
+    return jsonify({"message": "Cart cleared"}), 200

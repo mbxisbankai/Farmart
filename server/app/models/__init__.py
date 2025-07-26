@@ -1,4 +1,4 @@
-from app.config import db
+from app.extensions import db
 from app.models.user import User
 from app.models.cart import Cart
 from app.models.animal import Animal

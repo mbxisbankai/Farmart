@@ -1,6 +1,6 @@
 from flask_restful import Resource
 from flask import request, session, jsonify
-from app.config import db
+from app.extensions import db
 
 class CoreController(Resource):
     def __init__(self, model):
