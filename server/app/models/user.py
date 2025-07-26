@@ -1,6 +1,6 @@
 from app.extensions import db
-
 from werkzeug.security import generate_password_hash, check_password_hash
+
 
 class User(db.Model):
     __tablename__ = "users"
@@ -11,9 +11,11 @@ class User(db.Model):
     _password_hash = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(50), nullable=False, default='customer')
 
-    # Relationships (if you have them)
+    # Relationships
     payments = db.relationship("Payment", back_populates="user", cascade="all, delete")
     carts = db.relationship('Cart', back_populates='user', cascade="all, delete-orphan")
+    orders = db.relationship("Order", back_populates="user", cascade="all, delete-orphan")
+    farmer = db.relationship("Farmer", back_populates="user", uselist=False)  # ✅ Link to Farmer
 
     def __init__(self, username, email, password, role='customer'):
         self.username = username

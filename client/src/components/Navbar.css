@@ -1,0 +1,34 @@
+/* Navbar.css */
+.glass-navbar {
+  background: rgba(0, 123, 255, 0.5); /* Brighter Bootstrap Blue */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 123, 255, 0.35);
+  border-radius: 0 0 16px 16px;
+  transition: all 0.3s ease;
+}
+
+.glass-navbar .nav-link,
+.glass-navbar .navbar-brand {
+  color: #ffffff !important;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.glass-navbar .nav-link:hover {
+  color: #ffd54f !important; /* Bright yellow on hover */
+}
+
+.glass-navbar .btn-outline-light {
+  border-color: #ffffff;
+  color: #ffffff;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.glass-navbar .btn-outline-light:hover {
+  background-color: #ffffff;
+  color: #007bff;
+  font-weight: 600;
+}

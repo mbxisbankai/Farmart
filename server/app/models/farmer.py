@@ -1,29 +1,36 @@
 from app.extensions import db
 
 
-class Farmer(db.Model):
-    __tablename__ = 'farmers'
+class Animal(db.Model):
+    __tablename__ = 'animals'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
-    farm_name = db.Column(db.String(100), nullable=False)
-    location = db.Column(db.String(120), nullable=True)
-    farm_type = db.Column(db.String(100), nullable=True)
+    name = db.Column(db.String(100), nullable=False)
+    breed = db.Column(db.String(100), nullable=False)
+    age = db.Column(db.Integer)
+    price = db.Column(db.Float)
+    type = db.Column(db.String(50)) 
+    is_sold = db.Column(db.Boolean, default=False)
+    picture_url = db.Column(db.String(255)) 
 
-    # Relationships
-    user = db.relationship("User", back_populates="farmer")
-    animals = db.relationship("Animal", back_populates="farmer", cascade="all, delete-orphan")
-    payments = db.relationship("Payment", back_populates="farmer", cascade="all, delete-orphan")
+    farmer_id = db.Column(db.Integer, db.ForeignKey("farmers.id"), nullable=False)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=True)
+
+    carts = db.relationship('Cart', back_populates='animal', cascade="all, delete-orphan")
+    farmer = db.relationship("Farmer", back_populates="animals")
+    order = db.relationship("Order", back_populates="animals")
 
     def to_dict(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
-            "username": self.user.username if self.user else None,
-            "email": self.user.email if self.user else None,
-            "farm_name": self.farm_name,
-            "location": self.location,
-            "farm_type": self.farm_type,
-            "animals": [animal.to_dict() for animal in self.animals],
-            "payments": [payment.to_dict() for payment in self.payments]
+            "name": self.name,
+            "breed": self.breed,
+            "age": self.age,
+            "price": self.price,
+            "type": self.type,
+            "is_sold": self.is_sold,
+            "picture_url": self.picture_url,
+            "farmer_id": self.farmer_id,
+            "order_id": self.order_id,
+            "farmer": self.farmer.to_dict() if self.farmer else None
         }

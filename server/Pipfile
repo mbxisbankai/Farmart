@@ -8,13 +8,13 @@ flask = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 python-dotenv = "*"
-flask-cors = "*"
 requests = "*"
 sendgrid = "*"
 pyjwt = "*"
 flask-jwt-extended = "*"
 pillow = "*"
 flask-restful = "*"
+flask-cors = "*"
 
 [dev-packages]
 
