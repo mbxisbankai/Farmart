@@ -1,120 +1,69 @@
-// src/pages/AdminPage.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { Container, Row, Col, Card, Table, Spinner } from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { Card, Button } from "react-bootstrap";
+import OrderList from "../components/OrderList";
 
 function AdminPage() {
-  const [users, setUsers] = useState([]);
-  const [animals, setAnimals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user, token } = useAuth();
+  const navigate = useNavigate();
+  const [summary, setSummary] = useState({
+    total_users: 0,
+    total_animals: 0,
+    total_orders: 0,
+  });
 
   useEffect(() => {
-    Promise.all([
-      axios.get("http://localhost:5000/users"),
-      axios.get("http://localhost:5000/animals"),
-    ])
-      .then(([usersRes, animalsRes]) => {
-        setUsers(usersRes.data);
-        setAnimals(animalsRes.data);
-        setLoading(false);
+    if (!user || user.role !== "admin") {
+      navigate("/login");
+    } else {
+      fetch("/api/admin/summary", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
-      .catch((err) => {
-        console.error("Error fetching admin data:", err);
-        setLoading(false);
-      });
-  }, []);
-
-  const farmerCount = users.filter((u) => u.role === "farmer").length;
-
-  if (loading) {
-    return (
-      <div className="text-center mt-5">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
-  }
+        .then((r) => {
+          if (!r.ok) throw new Error("Failed to fetch admin summary");
+          return r.json();
+        })
+        .then(setSummary)
+        .catch((err) => console.error("❌ Admin summary error:", err));
+    }
+  }, [user, token, navigate]);
 
   return (
-    <Container className="mt-4">
-      <h2 className="text-center mb-4">Admin Dashboard</h2>
+    <div className="container mt-5">
+      <h2 className="mb-4">👑 Admin Dashboard</h2>
+      <div className="row">
+        <Card className="col-md-4 p-3 m-2 bg-light shadow-sm">
+          <h5>Total Users</h5>
+          <p className="fs-4">{summary.total_users}</p>
+        </Card>
+        <Card className="col-md-4 p-3 m-2 bg-light shadow-sm">
+          <h5>Total Animals</h5>
+          <p className="fs-4">{summary.total_animals}</p>
+        </Card>
+        <Card className="col-md-4 p-3 m-2 bg-light shadow-sm">
+          <h5>Total Orders</h5>
+          <p className="fs-4">{summary.total_orders}</p>
+        </Card>
+      </div>
 
-      <Row className="mb-4">
-        <Col md={4}>
-          <Card>
-            <Card.Body>
-              <Card.Title>Total Users</Card.Title>
-              <Card.Text>{users.length}</Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4}>
-          <Card>
-            <Card.Body>
-              <Card.Title>Total Animals</Card.Title>
-              <Card.Text>{animals.length}</Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4}>
-          <Card>
-            <Card.Body>
-              <Card.Title>Total Farmers</Card.Title>
-              <Card.Text>{farmerCount}</Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      <div className="mt-4 d-flex gap-3">
+        <Button variant="primary" onClick={() => navigate("/animals")}>
+          View All Animals
+        </Button>
+        <Button variant="secondary" onClick={() => navigate("/users")}>
+          Manage Users
+        </Button>
+        <Button variant="success" onClick={() => navigate("/")}>
+          Back to Homepage
+        </Button>
+      </div>
 
-      <Row>
-        <Col md={6}>
-          <h5>Registered Users</h5>
-          <Table striped bordered hover responsive size="sm">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.id}</td>
-                  <td>{user.username}</td>
-                  <td>{user.email}</td>
-                  <td>{user.role}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Col>
-        <Col md={6}>
-          <h5>All Submitted Animals</h5>
-          <Table striped bordered hover responsive size="sm">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Breed</th>
-                <th>Farmer</th>
-              </tr>
-            </thead>
-            <tbody>
-              {animals.map((animal) => (
-                <tr key={animal.id}>
-                  <td>{animal.id}</td>
-                  <td>{animal.name}</td>
-                  <td>{animal.breed}</td>
-                  <td>{animal.farmer_name || "N/A"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Col>
-      </Row>
-    </Container>
+      {/* ✅ OrderList added below */}
+      <OrderList />
+    </div>
   );
 }
 

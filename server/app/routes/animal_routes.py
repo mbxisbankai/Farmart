@@ -1,149 +1,114 @@
-from flask import Blueprint, request, jsonify, current_app, send_from_directory
-from werkzeug.utils import secure_filename
-from app.models.animal import Animal, db
-from app.utils.decorators import token_required
-from PIL import Image
-
 import os
-import io
-import uuid
+from flask import Blueprint, request, jsonify, current_app
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from werkzeug.utils import secure_filename
+from app.models import db, Animal, User
 
-animal_bp = Blueprint('animal_bp', __name__, url_prefix='/animals')
+animal_bp = Blueprint("animal_bp", __name__, url_prefix="/api/animals")
 
-UPLOAD_FOLDER = os.path.join('static', 'uploads', 'animals')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+UPLOAD_FOLDER = os.path.join("app", "static", "images", "animals")
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# 🔹 GET ALL animals with filters + pagination
-@animal_bp.route('/', methods=['GET'])
+# 🔍 Get all animals
+@animal_bp.route("/", methods=["GET"])
 def get_animals():
-    query = Animal.query
+    animals = Animal.query.all()
+    return jsonify([a.to_dict() for a in animals]), 200
 
-    # Filters
-    breed = request.args.get('breed')
-    age = request.args.get('age')
-    animal_type = request.args.get('type')
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 10))
-
-    if breed:
-        query = query.filter_by(breed=breed)
-    if age:
-        query = query.filter_by(age=int(age))
-    if animal_type:
-        query = query.filter_by(type=animal_type)
-
-    paginated = query.paginate(page=page, per_page=per_page, error_out=False)
-    animals = [animal.to_dict() for animal in paginated.items]
-
-    return jsonify({
-        "animals": animals,
-        "total": paginated.total,
-        "page": page,
-        "per_page": per_page
-    }), 200
-
-# 🔹 GET single animal
-@animal_bp.route('/<int:id>', methods=['GET'])
+# 🔍 Get one animal
+@animal_bp.route("/<int:id>", methods=["GET"])
 def get_animal(id):
     animal = Animal.query.get_or_404(id)
     return jsonify(animal.to_dict()), 200
 
-# 🔹 CREATE animal
-@animal_bp.route('/', methods=['POST'])
-@token_required
-def create_animal(current_user):
-    if 'picture' not in request.files:
-        return jsonify({'error': 'Picture file is required'}), 400
+# 🐮 Create animal (Farmer only)
+@animal_bp.route("/", methods=["POST"])
+@jwt_required()
+def create_animal():
+    user_id = get_jwt_identity()
+    user = User.query.get_or_404(user_id)
 
-    file = request.files['picture']
-    if file.filename == '' or not allowed_file(file.filename):
-        return jsonify({'error': 'Invalid file format'}), 400
+    if user.role != "farmer":
+        return jsonify({"error": "Only farmers can upload animals"}), 403
 
-    filename = secure_filename(f"{uuid.uuid4().hex}_{file.filename}")
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    name = request.form.get("name")
+    breed = request.form.get("breed")
+    age = request.form.get("age")
+    price = request.form.get("price")
+    description = request.form.get("description")
+    file = request.files.get("image")
 
-    try:
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-        image = Image.open(file)
-        image = image.convert("RGB")
-        image = image.resize((600, 400))
-        image.save(filepath)
+    if not all([name, breed, age, price, file]):
+        return jsonify({"error": "Missing required fields"}), 400
 
-        # Get fields
-        name = request.form.get('name')
-        breed = request.form.get('breed')
-        age = request.form.get('age')
-        price = request.form.get('price')
-        animal_type = request.form.get('type')
+    if not allowed_file(file.filename):
+        return jsonify({"error": "Invalid file type"}), 400
 
-        if not all([name, breed, age, price, animal_type]):
-            return jsonify({'error': 'Missing required fields'}), 400
+    # Save image
+    filename = secure_filename(file.filename)
+    image_path = os.path.join(UPLOAD_FOLDER, filename)
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+    file.save(image_path)
 
-        new_animal = Animal(
-            name=name,
-            breed=breed,
-            age=int(age),
-            price=float(price),
-            type=animal_type,
-            picture_url=f"/{filepath}",
-            farmer_id=current_user.id
-        )
+    new_animal = Animal(
+        name=name,
+        breed=breed,
+        age=int(age),
+        price=float(price),
+        description=description,
+        image_url=f"/static/images/animals/{filename}",
+        farmer_id=user.id,
+    )
+    db.session.add(new_animal)
+    db.session.commit()
+    return jsonify(new_animal.to_dict()), 201
 
-        db.session.add(new_animal)
-        db.session.commit()
-
-        return jsonify(new_animal.to_dict()), 201
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# 🔹 UPDATE animal (including image)
-@animal_bp.route('/<int:id>', methods=['PATCH'])
-@token_required
-def update_animal(current_user, id):
+# ✏️ Update (Farmer only + owner)
+@animal_bp.route("/<int:id>", methods=["PATCH"])
+@jwt_required()
+def update_animal(id):
     animal = Animal.query.get_or_404(id)
+    user_id = get_jwt_identity()
 
-    if animal.farmer_id != current_user.id:
-        return jsonify({'error': 'Unauthorized'}), 403
+    if animal.farmer_id != user_id:
+        return jsonify({"error": "Unauthorized"}), 403
 
-    # JSON fields
-    data = request.form.to_dict()
-    for field in ['name', 'breed', 'age', 'price', 'type', 'is_sold']:
-        if field in data:
-            setattr(animal, field, data[field])
+    name = request.form.get("name", animal.name)
+    breed = request.form.get("breed", animal.breed)
+    age = request.form.get("age", animal.age)
+    price = request.form.get("price", animal.price)
+    description = request.form.get("description", animal.description)
+    file = request.files.get("image")
 
-    # New image
-    if 'picture' in request.files:
-        file = request.files['picture']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(f"{uuid.uuid4().hex}_{file.filename}")
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            image = Image.open(file)
-            image = image.convert("RGB")
-            image = image.resize((600, 400))
-            image.save(filepath)
-            animal.picture_url = f"/{filepath}"
+    if file:
+        if not allowed_file(file.filename):
+            return jsonify({"error": "Invalid image format"}), 400
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(UPLOAD_FOLDER, filename))
+        animal.image_url = f"/static/images/animals/{filename}"
+
+    animal.name = name
+    animal.breed = breed
+    animal.age = int(age)
+    animal.price = float(price)
+    animal.description = description
 
     db.session.commit()
     return jsonify(animal.to_dict()), 200
 
-# 🔹 DELETE animal
-@animal_bp.route('/<int:id>', methods=['DELETE'])
-@token_required
-def delete_animal(current_user, id):
+# 🗑️ Delete (Farmer only + owner)
+@animal_bp.route("/<int:id>", methods=["DELETE"])
+@jwt_required()
+def delete_animal(id):
     animal = Animal.query.get_or_404(id)
+    user_id = get_jwt_identity()
 
-    if animal.farmer_id != current_user.id:
-        return jsonify({'error': 'Unauthorized'}), 403
+    if animal.farmer_id != user_id:
+        return jsonify({"error": "Unauthorized"}), 403
 
     db.session.delete(animal)
     db.session.commit()
-    return jsonify({'message': 'Animal deleted successfully'}), 200
-
-# 🔹 Serve uploaded images
-@animal_bp.route('/images/<filename>', methods=['GET'])
-def get_uploaded_image(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    return jsonify({"message": "Animal deleted"}), 200

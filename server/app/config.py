@@ -1,26 +1,38 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class Config:
-    # Flask core config
-    SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
-    FLASK_ENV = os.getenv('FLASK_ENV', 'development')
-    DEBUG = os.getenv('DEBUG', True)
+    # Secret keys
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 
-    # SQLAlchemy config
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_URI', 'sqlite:///dev.db')
+    # Database config
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    # JWT config
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-jwt-key")
-    JWT_ACCESS_TOKEN_EXPIRES = 3600  # seconds (1 hour)
-
-    # Upload config
-    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'app', 'static', 'uploads')
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Max file size: 16MB
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret')
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=1)
+    JWT_TOKEN_LOCATION = ['cookies']
+    JWT_COOKIE_SECURE = False
+    JWT_COOKIE_CSRF_PROTECT = False
+    JWT_COOKIE_SAMESITE = 'None'
+    JWT_ACCESS_COOKIE_PATH = '/api/'
+    JWT_REFRESH_COOKIE_PATH = '/api/auth/refresh'
+    
     # CORS
-    CORS_HEADERS = 'Content-Type'
+    CORS_SUPPORTS_CREDENTIALS = True
+    CORS_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+    ]
+    
+    # Security
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    
+    # Uploads
+    UPLOAD_FOLDER = 'static/uploads'
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB

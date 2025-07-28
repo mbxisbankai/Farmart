@@ -1,180 +1,144 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Table, Container, Row, Col, Alert } from 'react-bootstrap';
+// src/pages/FarmerPage.jsx
 
-function FarmerPage() {
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
+import { Container, Form, Button, Alert, Card } from "react-bootstrap";
+
+const FarmerPage = () => {
+  const { user, token } = useAuth();
   const [animals, setAnimals] = useState([]);
-  const [bookings, setBookings] = useState([]);
   const [formData, setFormData] = useState({
-    name: '',
-    breed: '',
-    age: '',
-    price: '',
-    type: '',
-    picture: null,
+    name: "",
+    breed: "",
+    age: "",
+    price: "",
+    description: "",
+    image: null,
   });
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  // Fetch farmer's animals
   useEffect(() => {
-    fetch('/my-animals', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => res.json())
-      .then(data => setAnimals(data.animals || []));
-  }, []);
+    if (token) {
+      api
+        .get("/animals", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          const userAnimals = res.data.filter((a) => a.farmer_id === user?.id);
+          setAnimals(userAnimals);
+        })
+        .catch(() => setError("Failed to fetch your animals."));
+    }
+  }, [token, user?.id]);
 
-  // Fetch farmer's bookings/orders
-  useEffect(() => {
-    fetch('/my-bookings', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => res.json())
-      .then(data => setBookings(data.bookings || []));
-  }, []);
-
-  // Handle form field changes
-  function handleChange(e) {
+  const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: files ? files[0] : value
-    }));
-  }
+    if (name === "image") {
+      setFormData({ ...formData, image: files[0] });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
 
-  // Submit new animal
-  function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = new FormData();
-    Object.entries(formData).forEach(([key, value]) => payload.append(key, value));
+    setError("");
+    setSuccess("");
 
-    fetch('/animals', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: payload,
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.id) {
-          setAnimals(prev => [data, ...prev]);
-          setMessage('Animal uploaded successfully!');
-        } else {
-          setMessage(data.error || 'Upload failed.');
-        }
+    const uploadData = new FormData();
+    for (let key in formData) {
+      uploadData.append(key, formData[key]);
+    }
+
+    try {
+      const res = await api.post("/animals/", uploadData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
-  }
+
+      setAnimals([...animals, res.data]);
+      setSuccess("Animal uploaded successfully!");
+      setFormData({
+        name: "",
+        breed: "",
+        age: "",
+        price: "",
+        description: "",
+        image: null,
+      });
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.error || "Upload failed. Check form and try again."
+      );
+    }
+  };
 
   return (
-    <Container className="my-4">
-      <h2 className="text-center mb-4">Farmer Dashboard</h2>
+    <Container className="mt-5">
+      <h2>Welcome {user?.email || "Farmer"}</h2>
+      <h4 className="mt-3">Upload a New Animal</h4>
 
-      {/* Upload Animal */}
-      <Card className="mb-4">
-        <Card.Body>
-          <Card.Title>Upload New Animal</Card.Title>
-          {message && <Alert variant="info">{message}</Alert>}
-          <Form onSubmit={handleSubmit} encType="multipart/form-data">
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-2">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control name="name" onChange={handleChange} required />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Breed</Form.Label>
-                  <Form.Control name="breed" onChange={handleChange} required />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Age</Form.Label>
-                  <Form.Control type="number" name="age" onChange={handleChange} required />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-2">
-                  <Form.Label>Price</Form.Label>
-                  <Form.Control type="number" name="price" onChange={handleChange} required />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Type</Form.Label>
-                  <Form.Control name="type" onChange={handleChange} required />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Picture</Form.Label>
-                  <Form.Control type="file" name="picture" onChange={handleChange} required />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Button type="submit" className="mt-2 w-100">Upload Animal</Button>
-          </Form>
-        </Card.Body>
-      </Card>
+      {error && <Alert variant="danger">{error}</Alert>}
+      {success && <Alert variant="success">{success}</Alert>}
 
-      {/* Owned Animals */}
-      <Card className="mb-4">
-        <Card.Body>
-          <Card.Title>My Animals</Card.Title>
-          {animals.length === 0 ? (
-            <p>No animals uploaded yet.</p>
-          ) : (
-            <Row>
-              {animals.map(animal => (
-                <Col md={4} key={animal.id} className="mb-3">
-                  <Card>
-                    <Card.Img
-                      variant="top"
-                      src={animal.picture_url}
-                      style={{ height: '200px', objectFit: 'cover' }}
-                    />
-                    <Card.Body>
-                      <Card.Title>{animal.name}</Card.Title>
-                      <Card.Text>
-                        Breed: {animal.breed}<br />
-                        Age: {animal.age} yrs<br />
-                        Type: {animal.type}<br />
-                        Price: Ksh {animal.price}
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          )}
-        </Card.Body>
-      </Card>
+      <Form onSubmit={handleSubmit} encType="multipart/form-data">
+        <Form.Group className="mb-3">
+          <Form.Label>Name</Form.Label>
+          <Form.Control name="name" value={formData.name} onChange={handleChange} required />
+        </Form.Group>
 
-      {/* Bookings / Orders */}
-      <Card>
-        <Card.Body>
-          <Card.Title>Orders / Bookings</Card.Title>
-          {bookings.length === 0 ? (
-            <p>No bookings yet.</p>
-          ) : (
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>Buyer</th>
-                  <th>Animal</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((b, i) => (
-                  <tr key={i}>
-                    <td>{b.buyer_name || b.buyer?.username}</td>
-                    <td>{b.animal_name || b.animal?.name}</td>
-                    <td>Ksh {b.price}</td>
-                    <td>{b.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          )}
-        </Card.Body>
-      </Card>
+        <Form.Group className="mb-3">
+          <Form.Label>Breed</Form.Label>
+          <Form.Control name="breed" value={formData.breed} onChange={handleChange} required />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Age</Form.Label>
+          <Form.Control type="number" name="age" value={formData.age} onChange={handleChange} required />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Price</Form.Label>
+          <Form.Control type="number" name="price" value={formData.price} onChange={handleChange} required />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Description (optional)</Form.Label>
+          <Form.Control as="textarea" rows={3} name="description" value={formData.description} onChange={handleChange} />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Image</Form.Label>
+          <Form.Control type="file" name="image" accept="image/*" onChange={handleChange} required />
+        </Form.Group>
+
+        <Button variant="primary" type="submit">Upload</Button>
+      </Form>
+
+      <hr />
+      <h4 className="mt-4">Your Uploaded Animals</h4>
+      <div className="d-flex flex-wrap gap-3">
+        {animals.map((animal) => (
+          <Card key={animal.id} style={{ width: "18rem" }}>
+            <Card.Img variant="top" src={animal.image_url} />
+            <Card.Body>
+              <Card.Title>{animal.name}</Card.Title>
+              <Card.Text>
+                Breed: {animal.breed}<br />
+                Age: {animal.age}<br />
+                Price: KES {animal.price}
+              </Card.Text>
+            </Card.Body>
+          </Card>
+        ))}
+      </div>
     </Container>
   );
-}
+};
 
 export default FarmerPage;
