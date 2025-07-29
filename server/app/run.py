@@ -12,7 +12,9 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 api = Api(app)
+db.init_app(app)
 jwt.init_app(app)
+migrate.init_app(app, db)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
 

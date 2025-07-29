@@ -7,12 +7,11 @@ load_dotenv()
 class Config:
     # Secret keys
     SECRET_KEY = os.getenv('SECRET_KEY')
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET')
 
     # Database config
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=1)
     JWT_TOKEN_LOCATION = ['cookies']
     JWT_COOKIE_SECURE = False
@@ -31,6 +30,12 @@ class Config:
     # Security
     SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_SAMESITE = 'Lax'
+
+    # Cloudinary
+    CLOUD_NAME = os.getenv('CLOUD_NAME')
+    CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
+    CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
+
     
     # Uploads
     UPLOAD_FOLDER = 'static/uploads'
