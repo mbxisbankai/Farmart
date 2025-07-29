@@ -36,6 +36,9 @@ class Config:
     CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
     CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
 
+    # Sendgrid
+    
+
     
     # Uploads
     UPLOAD_FOLDER = 'static/uploads'
