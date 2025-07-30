@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import api from "../api/axios";
 
 const AnimalList = () => {
   const [animals, setAnimals] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/animals/")
+    api.get("/animals/")
       .then((res) => res.json())
       .then((data) => setAnimals(data)) // ✅ direct array, no .animals
       .catch((err) => console.error("Failed to fetch animals:", err));

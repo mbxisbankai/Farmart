@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
+import api from "../api/axios";
 
 export default function OrderList() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/orders/")
+    api.get("/orders/")
       .then((res) => res.json())
       .then((data) => {
         console.log("Fetched orders:", data); // DEBUG: check structure

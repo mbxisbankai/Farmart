@@ -22,8 +22,7 @@ function BuyerPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/animals")
+      api.get("/animals/")
       .then((res) => {
         setAnimals(res.data);
         setLoading(false);

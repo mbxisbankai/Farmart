@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (email, password) => {
-    const res = await fetch("http://127.0.0.1:5000/api/auth/login", {
+    const res = await fetch(`${import.meta.env.BACKEND_URL}/api/auth/logout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
 
   // Logout function
   const logout = async () => {
-    await fetch("http://127.0.0.1:5000/api/auth/logout", {
+    await fetch(`${import.meta.env.BACKEND_URL}/api/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:5000/api/auth/me", {
+        const res = await fetch(`${import.meta.env.BACKEND_URL}/api/auth/me`, {
           credentials: "include"
         });
         if (res.ok) {

@@ -17,7 +17,7 @@ function AdminPage() {
     if (!user || user.role !== "admin") {
       navigate("/login");
     } else {
-      fetch("/api/admin/summary", {
+      fetch(`${import.meta.env.BACKEND_URL}/api/admin/summary`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
