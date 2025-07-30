@@ -14,11 +14,10 @@ import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const backendUrl = process.env.REACT_APP_BACKEND_URL;
-
 function BuyerPage() {
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const { cart, setCart } = useContext(CartContext);
   const navigate = useNavigate();
 
@@ -40,6 +39,52 @@ function BuyerPage() {
       setCart([...cart, animal]);
     }
   };
+
+  const handleCheckout = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You need to be logged in to checkout.");
+      navigate("/login");
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert("Your cart is empty.");
+      return;
+    }
+
+    const animalIds = cart.map((animal) => animal.id);
+
+    setCheckoutLoading(true);
+    try {
+      const response = await fetch(
+        `https://farmart-server-dcd6.onrender.com/api/payments/checkout/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ animal_ids: animalIds }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Payment failed.");
+      }
+
+      const data = await response.json();
+      alert(data.message || "Payment successful!");
+      setCart([]);
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Something went wrong during checkout.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
 
   return (
     <Container className="mt-4">
@@ -96,13 +141,28 @@ function BuyerPage() {
       {cart.length === 0 ? (
         <p className="text-muted">No items in cart yet.</p>
       ) : (
-        <ListGroup>
-          {cart.map((item) => (
-            <ListGroup.Item key={item.id}>
-              {item.name} - KES {item.price}
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
+        <>
+          <ListGroup>
+            {cart.map((item) => (
+              <ListGroup.Item key={item.id}>
+                {item.name} - KES {item.price}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+          <div className="mt-3 d-flex justify-content-between">
+            <strong>Total:</strong>
+            <span>KES {totalPrice}</span>
+          </div>
+          <div className="text-center mt-4">
+            <Button
+              variant="primary"
+              onClick={handleCheckout}
+              disabled={checkoutLoading}
+            >
+              {checkoutLoading ? "Processing..." : "Checkout"}
+            </Button>
+          </div>
+        </>
       )}
 
       <hr className="my-5" />
