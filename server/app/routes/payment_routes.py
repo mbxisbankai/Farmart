@@ -4,7 +4,7 @@ from app.controllers.payment_controller import (
 )
 from app.auth_middleware import jwt_required
 
-payment_bp = Blueprint("payment", __name__, url_prefix="/api/payments")
+payment_bp = Blueprint("payment", __name__, url_prefix="/api/payments", strict_slashes=False)
 
 payment_bp.route("/", methods=["POST"])(jwt_required(make_payment))
 payment_bp.route("/", methods=["GET"])(jwt_required(get_all_payments))
