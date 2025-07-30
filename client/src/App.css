@@ -36,3 +36,112 @@
     transform: rotate(360deg);
   }
 }
+
+
+.why-choose-farmart {
+  background-color: #f9f9f9;
+  padding: 40px 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 50px;
+}
+
+.why-choose-farmart h3 {
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #2c3e50;
+}
+
+.why-choose-farmart .feature {
+  padding: 10px 15px;
+  transition: transform 0.3s ease;
+}
+
+.why-choose-farmart .feature:hover {
+  transform: translateY(-5px);
+}
+
+.why-choose-farmart .feature h5 {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #27ae60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.1rem;
+}
+
+.why-choose-farmart .feature p {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+
+.how-it-works {
+  padding: 30px 20px;
+  margin-bottom: 50px;
+  background-color: #eafaf1;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.2);
+}
+
+.how-it-works h3 {
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #27ae60;
+}
+
+.how-it-works .step {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 10px 0;
+  border-right: 1px solid #27ae60;
+}
+
+.how-it-works .step:last-child {
+  border-right: none;
+}
+
+
+.about-farmart {
+  padding: 20px 15px;
+  font-size: 1rem;
+  color: #444;
+  max-width: 700px;
+  margin: 0 auto 60px auto;
+  line-height: 1.6;
+  text-align: center;
+  background-color: #fefefe;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.03);
+}
+
+@media (max-width: 768px) {
+  .why-choose-farmart .feature h5 {
+    font-size: 1rem;
+  }
+
+  .how-it-works .step {
+    font-size: 0.9rem;
+    border-right: none;
+    border-bottom: 1px solid #27ae60;
+    padding: 8px 0;
+  }
+
+  .how-it-works .step:last-child {
+    border-bottom: none;
+  }
+}
+
+
+.hero-section {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+body.dark-mode .hero-section {
+  background-color: #212529;
+  color: #f8f9fa;
+}
