@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
     // 👇 Update state with user + token
     setUser(data.user);
     setToken(data.access_token); // or data.token depending on your backend
+    localStorage.setItem("token", data.access_token);
   };
 
   // Logout function
