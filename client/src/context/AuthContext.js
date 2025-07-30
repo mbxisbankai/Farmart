@@ -51,22 +51,28 @@ export const AuthProvider = ({ children }) => {
 
   // Optionally auto-load current user (if using cookie-based session or persisted token)
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const res = await fetch(`https://farmart-server-dcd6.onrender.com/api/auth/me`, {
-          credentials: "include"
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-          setToken(data.access_token || null); // optional if backend includes token
-        }
-      } catch (err) {
-        console.error("Session check failed", err);
+  const tokenFromStorage = localStorage.getItem("token");
+  if (tokenFromStorage) {
+    setToken(tokenFromStorage);
+
+    // Optionally fetch user details from backend
+    fetch(`https://farmart-server-dcd6.onrender.com/api/auth/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${tokenFromStorage}`
       }
-    };
-    checkSession();
-  }, []);
+    })
+      .then(res => res.json())
+      .then(data => {
+        setUser(data.user); // or just setUser(data) depending on your route
+      })
+      .catch(err => {
+        console.error("Session check failed", err);
+        localStorage.removeItem("token");
+      });
+  }
+}, []);
+
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, authFetch }}>
