@@ -23,7 +23,7 @@ def create_app():
 
     # CORS configuration
     CORS(app,
-         origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://farmart-server-dcd6.onrender.com"],
+         origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://farmart-3502.onrender.com"],
          supports_credentials=True,
          allow_headers=["Content-Type", "Authorization", "Accept"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
