@@ -2,6 +2,7 @@ from flask import request, jsonify
 from app.models import Payment  # Ensure this model is defined correctly
 from app.extensions import db     # Ensure `db` is the SQLAlchemy instance from config
 from datetime import datetime, UTC
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 # Create a new payment
 def make_payment():
@@ -36,14 +37,16 @@ def get_payment_by_id(payment_id):
     return jsonify(payment.to_dict()), 200
 
 
+@jwt_required()
 def checkout_payment():
     data = request.get_json()
+    user_id = get_jwt_identity()
     try:
         new_payment = Payment(
-            user_id=data["user_id"],
+            user_id=user_id,
             amount=data["amount"],
             method=data["method"],
-            status="completed",  # or "pending"
+            status="completed",
             timestamp=datetime.now(UTC)
         )
         db.session.add(new_payment)
@@ -52,4 +55,3 @@ def checkout_payment():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 400
-
