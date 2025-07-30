@@ -20,12 +20,12 @@ function RegisterPage() {
     console.log("Form values:", values);
     
     try {
-      console.log("Making API request to:", `${import.meta.env.BACKEND_URL}/api/auth/register`);
+      console.log("Making API request to:", `${import.meta.env.REACT_APP_BACKEND_URL}/api/auth/register`);
       
       // Create axios instance with detailed config
       const response = await axios({
         method: 'POST',
-        url: `${import.meta.env.BACKEND_URL}/api/auth/register`,
+        url: `${import.meta.env.REACT_APP_BACKEND_URL}/api/auth/register`,
         data: values,
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ function RegisterPage() {
     const testConnection = async () => {
       try {
         console.log("Testing server connection...");
-        const response = await axios.get(`${import.meta.env.BACKEND_URL}/api/auth/check_session`);
+        const response = await axios.get(`${import.meta.env.REACT_APP_BACKEND_URL}/api/auth/check_session`);
         console.log("Server reachable (expected 401):", response.status);
       } catch (error) {
         if (error.response && error.response.status === 401) {
