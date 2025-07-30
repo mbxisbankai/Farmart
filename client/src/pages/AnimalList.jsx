@@ -7,7 +7,7 @@ const AnimalList = () => {
   const [animals, setAnimals] = useState([]);
 
   useEffect(() => {
-    fetch(`https://farmart-server-dcd6.onrender.com/api/animals`)
+    fetch(`https://farmart-server-dcd6.onrender.com/api/animals/`)
       .then((res) => res.json())
       .then((data) => setAnimals(data))
       .catch((err) => console.error("Failed to fetch animals:", err));

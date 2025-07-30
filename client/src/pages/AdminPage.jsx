@@ -19,7 +19,7 @@ function AdminPage() {
     if (!user || user.role !== "admin") {
       navigate("/login");
     } else {
-      fetch(`https://farmart-server-dcd6.onrender.com/api/admin/summary`, {
+      fetch(`https://farmart-server-dcd6.onrender.com/api/admin/users`, {
           headers: {
           Authorization: `Bearer ${token}`,
           },

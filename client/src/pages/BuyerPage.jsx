@@ -1,7 +1,5 @@
 // src/pages/BuyerPage.jsx
 import React, { useEffect, useState, useContext } from "react";
-import axios from "axios";
-import api from "../api/axios";
 import {
   Container,
   Row,
@@ -25,9 +23,10 @@ function BuyerPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-      fetch(`https://farmart-server-dcd6.onrender.com/api/animals`)
-      .then((res) => {
-        setAnimals(res.data);
+    fetch(`https://farmart-server-dcd6.onrender.com/api/animals/`)
+      .then((res) => res.json())
+      .then((data) => {
+        setAnimals(data);
         setLoading(false);
       })
       .catch((err) => {
