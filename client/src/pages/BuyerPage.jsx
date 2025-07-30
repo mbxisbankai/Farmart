@@ -65,8 +65,8 @@ function BuyerPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
           body: JSON.stringify({ animal_ids: animalIds }),
-          credentials: "include"
         }
       );
 
