@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import (
     create_access_token,
     jwt_required,
@@ -8,7 +8,7 @@ from flask_jwt_extended import (
 )
 from datetime import timedelta
 from app.models.user import User
-from app.extensions import db
+from app.extensions import db,jwt
 import logging
 import re
 import traceback
@@ -17,7 +17,7 @@ import traceback
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 # ---------- Routes ----------
 
@@ -134,6 +134,33 @@ def login_user():
     except Exception as e:
         logger.error("Login error: %s\n%s", str(e), traceback.format_exc())
         return jsonify({"error": "Login failed"}), 500
+    
+@auth_bp.route('/me', methods=['GET'])
+def get_current_user():
+    auth_header = request.headers.get('Authorization')
+
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({"error": "Authorization header missing or malformed"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    try:
+        decoded = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
+        user_id = decoded.get("user_id")
+
+        if not user_id:
+            return jsonify({"error": "Invalid token"}), 401
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        return jsonify(user.to_dict()), 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
 
 def check_session():
     try:
