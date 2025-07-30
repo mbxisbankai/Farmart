@@ -1,97 +1,82 @@
-// src/pages/CartPage.jsx
-import React, { useContext, useEffect, useState } from "react";
-import { Container, ListGroup, Button, Alert, Row, Col, Card } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import api from "../api/axios"; // your axios instance
+// pages/CartPage.jsx
+import React, { useContext, useState } from "react";
+import { CartContext } from "../context/CartContext";
+import PaymentPage from "./PaymentPage";
 
-const CartContext = React.createContext(); // Replace with actual import if needed
-
-const backendUrl = process.env.REACT_APP_BACKEND_URL;
+const backendUrl = "https://farmart-server-dcd6.onrender.com";
 
 function CartPage() {
   const { cart, setCart } = useContext(CartContext);
   const [orderPlaced, setOrderPlaced] = useState(false);
-  const [latestAnimals, setLatestAnimals] = useState([]);
+  const [successDetails, setSuccessDetails] = useState(null);
+  const [error, setError] = useState(null);
 
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    if (cart.length === 0 && !orderPlaced) {
-        fetch(`https://farmart-server-dcd6.onrender.com/api/animals`)
-        .then((res) => {
-          const latest = res.data.slice(-3).reverse(); // last 3
-          setLatestAnimals(latest);
-        })
-        .catch((err) => console.error("Failed to load animals:", err));
+  const handleCheckout = async () => {
+    try {
+      const resp = await fetch(`${backendUrl}/api/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ items: cart.map((item) => item.id) }),
+        credentials: "include"
+      });
+
+      if (!resp.ok) throw new Error("Checkout failed");
+      const data = await resp.json();
+
+      setSuccessDetails({
+        orderId: data.order_id,
+        totalAmount: data.total_amount,
+      });
+
+      setCart([]); // clear cart after order
+      setOrderPlaced(true);
+    } catch (err) {
+      console.error(err);
+      setError("Checkout failed. Please try again.");
     }
-  }, [cart, orderPlaced]);
-
-  const handleCheckout = () => {
-    setOrderPlaced(true);
-    setCart([]);
   };
 
+  if (orderPlaced && successDetails) {
+    return (
+      <PaymentPage
+        orderId={successDetails.orderId}
+        totalAmount={successDetails.totalAmount}
+      />
+    );
+  }
+
+  const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
+
   return (
-    <Container className="mt-5">
-      <h2 className="text-center mb-4">🛒 My Cart</h2>
-
-      {cart.length === 0 && !orderPlaced && (
+    <div className="container mt-4">
+      <h2>Your Cart</h2>
+      {cart.length === 0 ? (
+        <p>Your cart is empty.</p>
+      ) : (
         <>
-          <Alert variant="info">Your cart is currently empty.</Alert>
-          <div className="text-center mb-4">
-            <Link to="/animals">
-              <Button variant="outline-primary">Browse Animals</Button>
-            </Link>
-          </div>
-
-          <h5 className="mb-3">Try These</h5>
-          <Row>
-            {latestAnimals.map((animal) => (
-              <Col key={animal.id} sm={12} md={6} lg={4} className="mb-3">
-                <Card>
-                  <Card.Img
-                    variant="top"
-                    src={animal.picture_url}
-                    alt={animal.name}
-                    style={{ height: "200px", objectFit: "cover" }}
-                  />
-                  <Card.Body>
-                    <Card.Title>{animal.name}</Card.Title>
-                    <Card.Text>Breed: {animal.breed}</Card.Text>
-                    <Card.Text>Price: KES {animal.price}</Card.Text>
-                    <Link to="/animals">
-                      <Button variant="success">View Details</Button>
-                    </Link>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </>
-      )}
-
-      {orderPlaced && (
-        <Alert variant="success">✅ Order placed successfully!</Alert>
-      )}
-
-      {cart.length > 0 && (
-        <>
-          <ListGroup className="mb-3">
+          <ul className="list-group">
             {cart.map((item, index) => (
-              <ListGroup.Item key={index}>
-                {item.name} - KES {item.price}
-              </ListGroup.Item>
+              <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                {item.name}
+                <span>Ksh {item.price}</span>
+              </li>
             ))}
-          </ListGroup>
-
-          <h5>Total: KES {total}</h5>
-
-          <Button variant="primary" onClick={handleCheckout}>
+          </ul>
+          <div className="mt-3">
+            <strong>Total: Ksh {totalPrice}</strong>
+          </div>
+          <button onClick={handleCheckout} className="btn btn-success mt-3">
             Place Order
-          </Button>
+          </button>
+          {error && <p className="text-danger mt-2">{error}</p>}
         </>
       )}
-    </Container>
+    </div>
   );
 }
 
