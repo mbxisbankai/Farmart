@@ -23,13 +23,18 @@ const FarmerPage = () => {
     if (token) {
       api
         .get("/animals", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
         .then((res) => {
           const userAnimals = res.data.filter((a) => a.farmer_id === user?.id);
           setAnimals(userAnimals);
         })
-        .catch(() => setError("Failed to fetch your animals."));
+        .catch((err) => {
+          console.error(err);
+          setError("Failed to fetch your animals.");
+        });
     }
   }, [token, user?.id]);
 

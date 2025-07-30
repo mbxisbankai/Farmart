@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Card, Button } from "react-bootstrap";
 import OrderList from "../components/OrderList";
 
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
 function AdminPage() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
@@ -17,7 +19,7 @@ function AdminPage() {
     if (!user || user.role !== "admin") {
       navigate("/login");
     } else {
-      fetch(`${import.meta.env.REACT_APP_BACKEND_URL}/api/admin/summary`, {
+      fetch(`${backendUrl}/api/admin/summary`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

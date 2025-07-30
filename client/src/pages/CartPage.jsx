@@ -6,6 +6,8 @@ import api from "../api/axios"; // your axios instance
 
 const CartContext = React.createContext(); // Replace with actual import if needed
 
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
 function CartPage() {
   const { cart, setCart } = useContext(CartContext);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -15,8 +17,7 @@ function CartPage() {
 
   useEffect(() => {
     if (cart.length === 0 && !orderPlaced) {
-      api
-        .get("/animals/")
+        fetch(`${backendUrl}/api/animals`)
         .then((res) => {
           const latest = res.data.slice(-3).reverse(); // last 3
           setLatestAnimals(latest);

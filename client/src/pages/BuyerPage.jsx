@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
 function BuyerPage() {
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,7 @@ function BuyerPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-      api.get("/animals/")
+      fetch(`${backendUrl}/api/animals`)
       .then((res) => {
         setAnimals(res.data);
         setLoading(false);
