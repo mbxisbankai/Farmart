@@ -24,7 +24,8 @@ class Config:
     CORS_SUPPORTS_CREDENTIALS = True
     CORS_ORIGINS = [
         "http://localhost:3000",
-        "http://127.0.0.1:3000"
+        "http://127.0.0.1:3000",
+        "https://farmart-3502.onrender.com"
     ]
     
     # Security
@@ -37,7 +38,7 @@ class Config:
     CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
 
     # Sendgrid
-    
+
 
     
     # Uploads
