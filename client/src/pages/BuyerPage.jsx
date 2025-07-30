@@ -66,6 +66,7 @@ function BuyerPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ animal_ids: animalIds }),
+          credentials: "include"
         }
       );
 
