@@ -32,7 +32,7 @@ const HomePage = () => {
   return (
     <Container className="mt-5">
       {/* 🌟 Hero Section */}
-      <div className="text-center mb-5 p-5 bg-light rounded shadow">
+      <div className="hero-section text-center mb-5 p-5 rounded shadow">
         <h1 className="display-4 fw-bold">Welcome to Farmart</h1>
         <p className="lead">Connecting farmers and buyers for a smarter, healthier livestock trade.</p>
         <Button variant="success" size="lg" onClick={() => navigate("/animals")}>
@@ -68,43 +68,49 @@ const HomePage = () => {
       </Row>
 
       {/* 💡 Features Section */}
-      <h3 className="mb-3 text-center">Why Choose Farmart?</h3>
-      <Row className="mb-5 text-center">
-        <Col md={3}>
-          <h5>✅ Trusted Farmers</h5>
-          <p>Only verified farmers allowed to list animals.</p>
-        </Col>
-        <Col md={3}>
-          <h5>🚚 Delivery Options</h5>
-          <p>Nationwide delivery available for most animals.</p>
-        </Col>
-        <Col md={3}>
-          <h5>💳 Secure Payments</h5>
-          <p>We use secure gateways to protect your payments.</p>
-        </Col>
-        <Col md={3}>
-          <h5>🩺 Vaccinated Animals</h5>
-          <p>All listings are required to have proof of vaccination.</p>
-        </Col>
-      </Row>
+      <div className="why-choose-farmart">
+        <h3 className="text-center">Why Choose Farmart?</h3>
+        <Row className="mb-5 text-center">
+          <Col md={3} className="feature">
+            <h5>✅ Trusted Farmers</h5>
+            <p>Only verified farmers allowed to list animals.</p>
+          </Col>
+          <Col md={3} className="feature">
+            <h5>🚚 Delivery Options</h5>
+            <p>Nationwide delivery available for most animals.</p>
+          </Col>
+          <Col md={3} className="feature">
+            <h5>💳 Secure Payments</h5>
+            <p>We use secure gateways to protect your payments.</p>
+          </Col>
+          <Col md={3} className="feature">
+            <h5>🩺 Vaccinated Animals</h5>
+            <p>All listings are required to have proof of vaccination.</p>
+          </Col>
+        </Row>
+      </div>
 
       {/* 🧭 How It Works */}
-      <h3 className="mb-3 text-center">How It Works</h3>
-      <Row className="mb-5 text-center">
-        <Col md={3}><strong>1.</strong> Register an account</Col>
-        <Col md={3}><strong>2.</strong> Browse animals</Col>
-        <Col md={3}><strong>3.</strong> Add to cart</Col>
-        <Col md={3}><strong>4.</strong> Complete purchase</Col>
-      </Row>
+      <div className="how-it-works">
+        <h3 className="text-center">How It Works</h3>
+        <Row className="mb-5 text-center">
+          <Col md={3} className="step"><strong>1.</strong> Register an account</Col>
+          <Col md={3} className="step"><strong>2.</strong> Browse animals</Col>
+          <Col md={3} className="step"><strong>3.</strong> Add to cart</Col>
+          <Col md={3} className="step"><strong>4.</strong> Complete purchase</Col>
+        </Row>
+      </div>
 
       {/* 🧑‍🌾 About */}
-      <h3 className="mb-3 text-center">About Farmart</h3>
-      <p className="text-center mb-5">
-        Farmart is a digital marketplace bridging the gap between farmers and buyers.
-        We aim to simplify livestock trading through a seamless, transparent platform.
-        Whether you’re a farmer looking to list your animals or a buyer seeking quality livestock,
-        Farmart makes the process quick and easy.
-      </p>
+      <div className="about-farmart">
+        <h3 className="text-center">About Farmart</h3>
+        <p>
+          Farmart is a digital marketplace bridging the gap between farmers and buyers.
+          We aim to simplify livestock trading through a seamless, transparent platform.
+          Whether you’re a farmer looking to list your animals or a buyer seeking quality livestock,
+          Farmart makes the process quick and easy.
+        </p>
+      </div>
     </Container>
   );
 };

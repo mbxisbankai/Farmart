@@ -135,3 +135,14 @@
     border-bottom: none;
   }
 }
+
+/* Hero Section Styling */
+.hero-section {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+body.dark-mode .hero-section {
+  background-color: #212529;
+  color: #f8f9fa;
+}
