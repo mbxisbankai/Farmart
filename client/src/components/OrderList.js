@@ -7,7 +7,7 @@ export default function OrderList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/orders/")
+      fetch("https://farmart-server-dcd6.onrender.com/api/orders")
       .then((res) => res.json())
       .then((data) => {
         console.log("Fetched orders:", data); // DEBUG: check structure

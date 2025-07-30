@@ -4,7 +4,7 @@ import axios from "axios";
 
 // Create an Axios instance
 const api = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_URL, // or your production backend URL
+  baseURL: "https://farmart-server-dcd6.onrender.com",
   withCredentials: true,                // 🔐 Send cookies with every request
   headers: {
     "Content-Type": "application/json",

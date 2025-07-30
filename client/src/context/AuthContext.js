@@ -3,8 +3,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
-const backendUrl = process.env.REACT_APP_BACKEND_URL;
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);        // Contains user info: { name, role, ... }
   const [token, setToken] = useState(null);      // JWT token
@@ -20,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (email, password) => {
-    const res = await fetch(`${backendUrl}/api/auth/logout`, {
+    const res = await fetch(`https://farmart-server-dcd6.onrender.com/api/auth/logout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -42,7 +40,7 @@ export const AuthProvider = ({ children }) => {
 
   // Logout function
   const logout = async () => {
-    await fetch(`${backendUrl}/api/auth/logout`, {
+    await fetch(`https://farmart-server-dcd6.onrender.com/api/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
@@ -54,7 +52,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch(`${backendUrl}/api/auth/me`, {
+        const res = await fetch(`https://farmart-server-dcd6.onrender.com/api/auth/me`, {
           credentials: "include"
         });
         if (res.ok) {

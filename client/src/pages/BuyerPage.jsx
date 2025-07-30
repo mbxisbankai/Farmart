@@ -25,7 +25,7 @@ function BuyerPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-      fetch(`${backendUrl}/api/animals`)
+      fetch(`https://farmart-server-dcd6.onrender.com/api/animals`)
       .then((res) => {
         setAnimals(res.data);
         setLoading(false);

@@ -22,7 +22,7 @@ function RegisterPage() {
     console.log("Form values:", values);
     
     try {
-      console.log("Making API request to:", `${backendUrl}/api/auth/register`);
+      console.log("Making API request to:", `https://farmart-server-dcd6.onrender.com/api/auth/register`);
       
       // Create axios instance with detailed config
       const response = await axios({

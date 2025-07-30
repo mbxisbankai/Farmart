@@ -17,7 +17,7 @@ function CartPage() {
 
   useEffect(() => {
     if (cart.length === 0 && !orderPlaced) {
-        fetch(`${backendUrl}/api/animals`)
+        fetch(`https://farmart-server-dcd6.onrender.com/api/animals`)
         .then((res) => {
           const latest = res.data.slice(-3).reverse(); // last 3
           setLatestAnimals(latest);

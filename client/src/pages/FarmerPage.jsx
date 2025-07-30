@@ -22,7 +22,7 @@ const FarmerPage = () => {
   useEffect(() => {
     if (token) {
       api
-        .get("/animals", {
+        .get("/animals/", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
