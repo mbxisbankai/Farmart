@@ -37,7 +37,7 @@ def seed_data():
         price=75000,
         type="Cow",
         description="Healthy and fully vaccinated",
-        picture_url="/uploads/bella.jpg",
+        picture_url="https://cdn.britannica.com/55/174255-050-526314B6/brown-Guernsey-cow.jpg",
         farmer_id=farmer_profile.id,
         user_id=None,  # not sold yet
         is_sold=False
