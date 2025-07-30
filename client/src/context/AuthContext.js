@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (email, password) => {
-    const res = await fetch(`https://farmart-server-dcd6.onrender.com/api/auth/logout`, {
+    const res = await fetch(`https://farmart-server-dcd6.onrender.com/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
