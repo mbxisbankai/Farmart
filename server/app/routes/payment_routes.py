@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from app.controllers.payment_controller import (
     make_payment, get_all_payments, get_payment_by_id, checkout_payment
 )
@@ -10,3 +10,7 @@ payment_bp.route("/", methods=["POST"])(jwt_required(make_payment))
 payment_bp.route("/", methods=["GET"])(jwt_required(get_all_payments))
 payment_bp.route("/<int:payment_id>", methods=["GET"])(jwt_required(get_payment_by_id))
 payment_bp.route("/checkout", methods=["POST"])(jwt_required(checkout_payment))
+
+@payment_bp.route("/checkout", methods=["OPTIONS"])
+def checkout_options():
+    return jsonify({"message": "CORS preflight successful"}), 200
