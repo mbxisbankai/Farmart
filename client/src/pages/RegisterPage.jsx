@@ -24,7 +24,6 @@ function RegisterPage() {
     try {
       console.log("Making API request to:", `${backendUrl}/api/auth/register`);
       
-      // Create axios instance with detailed config
       const response = await axios({
         method: 'POST',
         url: `${backendUrl}/api/auth/register`,
@@ -33,8 +32,8 @@ function RegisterPage() {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        timeout: 10000, // 10 second timeout
-        withCredentials: false, // Explicitly set to false to match backend
+        timeout: 10000,
+        withCredentials: true, 
       });
       
       console.log("✅ Registration successful!");
@@ -53,7 +52,6 @@ function RegisterPage() {
         console.error("Request timeout - server might be down");
         setStatus({ type: 'error', message: "Request timeout. Please check if the server is running." });
       } else if (error.response) {
-        // Server responded with error status
         console.error("Server error response:");
         console.error("Status:", error.response.status);
         console.error("Headers:", error.response.headers);
@@ -84,7 +82,6 @@ function RegisterPage() {
           message: "No response from server. Please check if the server is running." 
         });
       } else {
-        // Something else happened
         console.error("Unexpected error:", error.message);
         setStatus({ type: 'error', message: "An unexpected error occurred: " + error.message });
       }
@@ -94,7 +91,6 @@ function RegisterPage() {
     }
   };
 
-  // Test server connectivity on component mount
   React.useEffect(() => {
     const testConnection = async () => {
       try {

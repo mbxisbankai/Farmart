@@ -7,9 +7,7 @@ const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);        // Contains user info: { name, role, ... }
-  const [token, setToken] = useState(null);      // JWT token
-
-  // Automatically attach token to all future fetch requests
+  const [token, setToken] = useState(null);    
   const authFetch = async (url, options = {}) => {
     const headers = {
       ...options.headers,
@@ -20,12 +18,12 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (email, password) => {
-    const res = await fetch(`${backendUrl}/api/auth/logout`, {
+    const res = await fetch(`${backendUrl}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      credentials: "include",  // Required if backend sets a cookie
+      credentials: "include",  
       body: JSON.stringify({ email, password })
     });
 
@@ -50,17 +48,16 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
   };
 
-  // Optionally auto-load current user (if using cookie-based session or persisted token)
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch(`${backendUrl}/api/auth/me`, {
+        const res = await fetch(`${backendUrl}/api/auth/check_session`, {
           credentials: "include"
         });
         if (res.ok) {
           const data = await res.json();
           setUser(data.user);
-          setToken(data.access_token || null); // optional if backend includes token
+          setToken(data.access_token || null); 
         }
       } catch (err) {
         console.error("Session check failed", err);
