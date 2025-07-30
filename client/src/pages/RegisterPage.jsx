@@ -5,6 +5,8 @@ import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
 const RegisterSchema = Yup.object().shape({
   username: Yup.string().min(3).required("Username is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -20,12 +22,12 @@ function RegisterPage() {
     console.log("Form values:", values);
     
     try {
-      console.log("Making API request to:", `${import.meta.env.REACT_APP_BACKEND_URL}/api/auth/register`);
+      console.log("Making API request to:", `${backendUrl}/api/auth/register`);
       
       // Create axios instance with detailed config
       const response = await axios({
         method: 'POST',
-        url: `${import.meta.env.REACT_APP_BACKEND_URL}/api/auth/register`,
+        url: `${backendUrl}/api/auth/register`,
         data: values,
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +99,7 @@ function RegisterPage() {
     const testConnection = async () => {
       try {
         console.log("Testing server connection...");
-        const response = await axios.get(`${import.meta.env.REACT_APP_BACKEND_URL}/api/auth/check_session`);
+        const response = await axios.get(`${backendUrl}/api/auth/check_session`);
         console.log("Server reachable (expected 401):", response.status);
       } catch (error) {
         if (error.response && error.response.status === 401) {
