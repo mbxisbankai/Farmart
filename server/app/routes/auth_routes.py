@@ -51,14 +51,14 @@ def logout():
 
 def _build_preflight_response():
     response = jsonify({"message": "Preflight OK"})
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+    response.headers.add('Access-Control-Allow-Origin', 'https://farmart-3502.onrender.com')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
     return response
 
 def _add_cors_headers(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+    response.headers.add('Access-Control-Allow-Origin', 'https://farmart-3502.onrender.com')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
