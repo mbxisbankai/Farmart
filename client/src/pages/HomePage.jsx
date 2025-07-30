@@ -11,21 +11,21 @@ const HomePage = () => {
       name: "Dairy Cow",
       breed: "Friesian",
       price: 75000,
-      picture_url: "/static/images/animals/cow1.jpg",
+      picture_url: "https://cdn.britannica.com/53/157153-050-E5582B5A/Holstein-cow.jpg",
     },
     {
       id: 2,
       name: "Boer Cow",
       breed: "Boer",
       price: 15000,
-      picture_url: "/static/images/animals/bull2.jpg",
+      picture_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQMEqNVjPtqyLxENr3lYIcSIEzClcSm3Wo2w&s",
     },
     {
       id: 3,
       name: "Chicken",
       breed: "Indigenous",
       price: 800,
-      picture_url: "/static/images/animals/chicken1.jpg",
+      picture_url: "https://rsdalesotho.com/wp-content/uploads/2017/05/ribaneng0111.jpg?w=1080",
     },
   ];
 
