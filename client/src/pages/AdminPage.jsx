@@ -20,9 +20,10 @@ function AdminPage() {
       navigate("/login");
     } else {
       fetch(`https://farmart-server-dcd6.onrender.com/api/admin/summary`, {
-        headers: {
+          headers: {
           Authorization: `Bearer ${token}`,
-        },
+          },
+          creadentials: "include"
       })
         .then((r) => {
           if (!r.ok) throw new Error("Failed to fetch admin summary");

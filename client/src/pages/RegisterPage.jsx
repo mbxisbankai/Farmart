@@ -34,7 +34,7 @@ function RegisterPage() {
           'Accept': 'application/json',
         },
         timeout: 10000, // 10 second timeout
-        withCredentials: false, // Explicitly set to false to match backend
+        withCredentials: True, // Explicitly set to false to match backend
       });
       
       console.log("✅ Registration successful!");
