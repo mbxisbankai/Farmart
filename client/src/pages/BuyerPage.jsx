@@ -58,7 +58,7 @@ function BuyerPage() {
     setCheckoutLoading(true);
     try {
       const response = await fetch(
-        `https://farmart-server-dcd6.onrender.com/api/payments/checkout/`,
+        `https://farmart-server-dcd6.onrender.com/api/payments/checkout`,
         {
           method: "POST",
           headers: {
