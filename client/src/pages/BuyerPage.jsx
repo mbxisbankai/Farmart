@@ -21,7 +21,7 @@ function BuyerPage() {
   const { cart, setCart } = useContext(CartContext);
   const navigate = useNavigate();
 
-  useEffect(() => {
+    useEffect(() => {
       fetch(`https://farmart-server-dcd6.onrender.com/api/animals/`)
         .then((res) => res.json())
         .then((data) => {
@@ -46,8 +46,8 @@ function BuyerPage() {
     }, []);
 
 
-  const addToCart = async (animal) => {
-  const token = localStorage.getItem("token");
+    const addToCart = async (animal) => {
+    const token = localStorage.getItem("token");
 
   if (!token) {
     alert("You need to be logged in to add to cart.");
@@ -93,7 +93,7 @@ function BuyerPage() {
   }
 };
 
-const removeFromCart = async (animalId) => {
+  const removeFromCart = async (animalId) => {
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -139,7 +139,7 @@ const removeFromCart = async (animalId) => {
   }
 };
 
-const clearCart = async () => {
+  const clearCart = async () => {
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -172,6 +172,61 @@ const clearCart = async () => {
     alert(error.message || "Failed to clear cart.");
   }
 };
+
+  const handleCheckout = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("You need to be logged in to checkout.");
+    navigate("/login");
+    return;
+  }
+
+  if (!cart || cart.length === 0) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  setCheckoutLoading(true);
+
+  try {
+    const response = await fetch(
+      "https://farmart-server-dcd6.onrender.com/api/orders/",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          items: cart.map((item) => ({
+            animal_id: item.animal_id || item.id,
+          })),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data?.error || "Checkout failed.");
+    }
+
+    // Clear cart and show success
+    setCart([]);
+    alert("🎉 Order placed successfully!");
+
+    // Optionally redirect to orders page
+    navigate("/orders");
+  } catch (err) {
+    console.error("Checkout error:", err);
+    alert(err.message || "Something went wrong during checkout.");
+  } finally {
+    setCheckoutLoading(false);
+  }
+};
+
 
 
   const totalPrice = Array.isArray(cart) ? cart.reduce((acc, item) => acc + item.price, 0) : 0;
