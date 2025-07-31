@@ -11,7 +11,8 @@ export const AuthProvider = ({ children }) => {
   const authFetch = async (url, options = {}) => {
     const headers = {
       ...options.headers,
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
+      credentials: "include"
     };
     return fetch(url, { ...options, headers });
   };
