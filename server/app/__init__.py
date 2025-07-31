@@ -55,6 +55,7 @@ def create_app():
     from app.routes.order_routes import order_bp
     from app.routes.payment_routes import payment_bp
     from app.routes.user_routes import user_bp
+    from app.routes.admin_routes import admin_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(animal_bp, url_prefix='/api/animals')
@@ -63,6 +64,7 @@ def create_app():
     app.register_blueprint(order_bp, url_prefix='/api/orders')
     app.register_blueprint(payment_bp, url_prefix='/api/payments')
     app.register_blueprint(user_bp, url_prefix='/api/users')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
     # Static image file route
     @app.route('/images/<path:filename>')
