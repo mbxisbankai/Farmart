@@ -9,21 +9,25 @@ const backendUrl = process.env.REACT_APP_BACKEND_URL;
 function AdminPage() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
+
   const [summary, setSummary] = useState({
     total_users: 0,
     total_animals: 0,
     total_orders: 0,
   });
 
+  const [showUsers, setShowUsers] = useState(false);
+  const [users, setUsers] = useState([]);
+
   useEffect(() => {
     if (!user || user.role !== "admin") {
       navigate("/login");
     } else {
-      fetch(`https://farmart-server-dcd6.onrender.com/api/admin/users`, {
-          headers: {
+      fetch(`https://farmart-server-dcd6.onrender.com/api/admin/summary`, {
+        headers: {
           Authorization: `Bearer ${token}`,
-          },
-          creadentials: "include"
+        },
+        credentials: "include",
       })
         .then((r) => {
           if (!r.ok) throw new Error("Failed to fetch admin summary");
@@ -34,9 +38,27 @@ function AdminPage() {
     }
   }, [user, token, navigate]);
 
+  const fetchUsers = () => {
+    fetch("https://farmart-server-dcd6.onrender.com/api/admin/users", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to fetch users");
+        return r.json();
+      })
+      .then((data) => {
+        setUsers(data);
+        setShowUsers(true);
+      })
+      .catch((err) => console.error("❌ Users fetch error:", err));
+  };
+
   return (
     <div className="container mt-5">
       <h2 className="mb-4">👑 Admin Dashboard</h2>
+
       <div className="row">
         <Card className="col-md-4 p-3 m-2 bg-light shadow-sm">
           <h5>Total Users</h5>
@@ -56,7 +78,7 @@ function AdminPage() {
         <Button variant="primary" onClick={() => navigate("/animals")}>
           View All Animals
         </Button>
-        <Button variant="secondary" onClick={() => navigate("/users")}>
+        <Button variant="secondary" onClick={fetchUsers}>
           Manage Users
         </Button>
         <Button variant="success" onClick={() => navigate("/")}>
@@ -64,8 +86,22 @@ function AdminPage() {
         </Button>
       </div>
 
-      {/* ✅ OrderList added below */}
+      {/* ✅ OrderList */}
       <OrderList />
+
+      {/* ✅ Users list (only shown when showUsers is true) */}
+      {showUsers && (
+        <div className="mt-5">
+          <h3>👥 All Users</h3>
+          <ul className="list-group mt-3">
+            {users.map((u) => (
+              <li key={u.id} className="list-group-item">
+                {u.username} ({u.email}) — {u.role}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

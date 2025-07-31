@@ -2,11 +2,13 @@ from flask import Blueprint, jsonify
 from app.models import User, Animal, Order  # adjust if model is Purchase or Booking instead
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
+from functools import wraps
 
 admin_bp = Blueprint("admin_bp", __name__, url_prefix="/api/admin")
 
 # Optional admin-only decorator
 def admin_required(func):
+    @wraps(func)
     @jwt_required()
     def wrapper(*args, **kwargs):
         user_id = get_jwt_identity()
