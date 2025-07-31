@@ -1,20 +1,27 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);        // Contains user info: { name, role, ... }
-  const [token, setToken] = useState(null);      // JWT token
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
 
-  // Automatically attach token to all future fetch requests
+  // Authenticated fetch helper
   const authFetch = async (url, options = {}) => {
     const headers = {
       ...options.headers,
-      Authorization: `Bearer ${token}`,
-      credentials: "include"
     };
-    return fetch(url, { ...options, headers });
+
+    // Only attach token if available
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    return fetch(url, {
+      ...options,
+      headers,
+      credentials: "include", // Always include cookies
+    });
   };
 
   // Login function
@@ -22,9 +29,9 @@ export const AuthProvider = ({ children }) => {
     const res = await fetch(`https://farmart-server-dcd6.onrender.com/api/auth/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
-      }, 
-      body: JSON.stringify({ email, password })
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) {
@@ -33,9 +40,8 @@ export const AuthProvider = ({ children }) => {
 
     const data = await res.json();
 
-    // 👇 Update state with user + token
     setUser(data.user);
-    setToken(data.access_token); // or data.token depending on your backend
+    setToken(data.access_token);
     localStorage.setItem("token", data.access_token);
   };
 
@@ -45,35 +51,45 @@ export const AuthProvider = ({ children }) => {
       method: "POST",
       credentials: "include",
     });
+
     setUser(null);
     setToken(null);
+    localStorage.removeItem("token");
   };
 
-  // Optionally auto-load current user (if using cookie-based session or persisted token)
+  // On mount, check for token and fetch user if needed
   useEffect(() => {
-  const tokenFromStorage = localStorage.getItem("token");
-  if (tokenFromStorage) {
-    setToken(tokenFromStorage);
+    const tokenFromStorage = localStorage.getItem("token");
 
-    // Optionally fetch user details from backend
-    fetch(`https://farmart-server-dcd6.onrender.com/api/auth/me`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${tokenFromStorage}`
-      },
-      credentials: "include"
-    })
-      .then(res => res.json())
-      .then(data => {
-        setUser(data.user); // or just setUser(data) depending on your route
+    if (tokenFromStorage) {
+      setToken(tokenFromStorage);
+
+      fetch(`https://farmart-server-dcd6.onrender.com/api/auth/me`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${tokenFromStorage}`,
+        },
+        credentials: "include",
       })
-      .catch(err => {
-        console.error("Session check failed", err);
-        localStorage.removeItem("token");
-      });
-  }
-}, []);
-
+        .then((res) => {
+          if (!res.ok) throw new Error("User session expired");
+          return res.json();
+        })
+        .then((data) => {
+          if (data?.user) {
+            setUser(data.user);
+          } else {
+            throw new Error("Invalid user data");
+          }
+        })
+        .catch((err) => {
+          console.error("Session check failed:", err);
+          localStorage.removeItem("token");
+          setToken(null);
+          setUser(null);
+        });
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, authFetch }}>
