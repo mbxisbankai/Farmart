@@ -24,8 +24,9 @@ const FarmerPage = () => {
       api
         .get("/animals/", {
           headers: {
-            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
+          credentials: "include",
         })
         .then((res) => {
           const userAnimals = res.data.filter((a) => a.farmer_id === user?.id);
@@ -61,8 +62,8 @@ const FarmerPage = () => {
       const res = await api.post("/animals/", uploadData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include"
       });
 
       setAnimals([...animals, res.data]);
