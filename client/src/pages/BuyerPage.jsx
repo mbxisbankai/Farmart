@@ -246,7 +246,7 @@ function BuyerPage() {
                 <Card>
                   <Card.Img
                     variant="top"
-                    src={animal.image_url || "https://via.placeholder.com/300x200"}
+                    src={animal.picture_url || "https://via.placeholder.com/300x200"}
                     alt={animal.name}
                     style={{ height: "200px", objectFit: "cover" }}
                   />

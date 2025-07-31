@@ -20,7 +20,7 @@ def get_cart_items():
             "cart_id": item.id,
             "animal_id": animal.id,
             "animal_name": animal.name,
-            "image": animal.image,  # static path
+            "image": animal.picture_url,  # static path
             "price": animal.price,
         })
 
@@ -51,19 +51,26 @@ def add_to_cart():
 
     return jsonify({"message": "Animal added to cart"}), 201
 
-# === DELETE item from cart ===
-@cart_bp.route("/<int:cart_id>", methods=["DELETE"])
+# === REMOVE from cart by animal_id ===
+@cart_bp.route("/", methods=["DELETE"])
 @jwt_required()
-def delete_cart_item(cart_id):
+def remove_from_cart():
     user_id = get_jwt_identity()
-    cart_item = Cart.query.get(cart_id)
+    data = request.get_json()
+    animal_id = data.get("animal_id")
 
-    if not cart_item or cart_item.user_id != user_id:
+    if not animal_id:
+        return jsonify({"error": "Animal ID is required"}), 400
+
+    cart_item = Cart.query.filter_by(user_id=user_id, animal_id=animal_id).first()
+
+    if not cart_item:
         return jsonify({"error": "Cart item not found"}), 404
 
     db.session.delete(cart_item)
     db.session.commit()
-    return jsonify({"message": "Cart item deleted"}), 200
+    return jsonify({"message": "Animal removed from cart"}), 200
+
 
 # === CLEAR entire cart ===
 @cart_bp.route("/clear", methods=["DELETE"])
