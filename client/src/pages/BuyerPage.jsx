@@ -46,7 +46,7 @@ function BuyerPage() {
     }, []);
 
 
-    const addToCart = async (animal) => {
+  const addToCart = async (animal) => {
     const token = localStorage.getItem("token");
 
   if (!token) {
@@ -196,7 +196,7 @@ function BuyerPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
         body: JSON.stringify({
