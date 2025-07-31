@@ -135,32 +135,24 @@ def login_user():
         logger.error("Login error: %s\n%s", str(e), traceback.format_exc())
         return jsonify({"error": "Login failed"}), 500
     
-@auth_bp.route('/me', methods=['GET'])
+@auth_bp.route('/me', methods=['GET', 'OPTIONS'])
+@jwt_required()
 def get_current_user():
-    auth_header = request.headers.get('Authorization')
-
-    if not auth_header or not auth_header.startswith('Bearer '):
-        return jsonify({"error": "Authorization header missing or malformed"}), 401
-
-    token = auth_header.split(" ")[1]
+    if request.method == 'OPTIONS':
+        return _build_preflight_response()
 
     try:
-        decoded = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
-        user_id = decoded.get("user_id")
-
-        if not user_id:
-            return jsonify({"error": "Invalid token"}), 401
-
+        user_id = get_jwt_identity()
         user = User.query.get(user_id)
+
         if not user:
             return jsonify({"error": "User not found"}), 404
 
         return jsonify(user.to_dict()), 200
 
-    except jwt.ExpiredSignatureError:
-        return jsonify({"error": "Token has expired"}), 401
-    except jwt.InvalidTokenError:
-        return jsonify({"error": "Invalid token"}), 401
+    except Exception as e:
+        logger.error("Get current user error: %s\n%s", str(e), traceback.format_exc())
+        return jsonify({"error": "Failed to fetch user"}), 500
 
 def check_session():
     try:
