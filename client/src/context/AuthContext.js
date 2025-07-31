@@ -23,8 +23,7 @@ export const AuthProvider = ({ children }) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
-      },
-      credentials: "include",  // Required if backend sets a cookie
+      }, 
       body: JSON.stringify({ email, password })
     });
 
@@ -61,7 +60,8 @@ export const AuthProvider = ({ children }) => {
       method: "GET",
       headers: {
         Authorization: `Bearer ${tokenFromStorage}`
-      }
+      },
+      credentials: "include"
     })
       .then(res => res.json())
       .then(data => {
