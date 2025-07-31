@@ -30,3 +30,5 @@ def token_required(f):
         except Exception as e:
             return jsonify({'message': 'Token is missing or invalid'}), 401
     return decorated
+
+admin_required = role_required("admin")
