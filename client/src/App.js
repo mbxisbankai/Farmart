@@ -10,6 +10,7 @@ import FarmerPage from "./pages/FarmerPage";
 import BuyerPage from "./pages/BuyerPage";
 import AnimalList from "./pages/AnimalList";
 import CartPage from "./pages/CartPage";
+import PaymentPage from "./pages/PaymentPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -46,6 +47,12 @@ function App() {
           path="/cart"
           element={
             <ProtectedRoute allowedRoles={["buyer"]} element={<CartPage />} />
+          }
+        />
+        <Route
+          path="/payment"
+          element={
+            <ProtectedRoute allowedRoles={["buyer"]} element={<PaymentPage />} />
           }
         />
       </Routes>

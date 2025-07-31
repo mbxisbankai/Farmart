@@ -220,7 +220,7 @@ function BuyerPage() {
     navigate("/payment", {
       state: {
         orderId: data.id,
-        totalAmount: data.total_amount || 0,
+        totalAmount: data.total_amount,
       },
     });
   } catch (err) {
