@@ -54,7 +54,17 @@ function BuyerPage() {
           credentials: "include"
         })
           .then((res) => res.json())
-          .then(setCart)
+          .then((data) => {
+            console.log("Cart response:", data);
+            if (Array.isArray(data)) {
+              setCart(data);
+            } else if (Array.isArray(data.cart)) {
+              setCart(data.cart);
+            } else {
+              console.warn("Cart data is not an array:", data);
+              setCart([]); // prevent .map() crash
+            }
+          })
           .catch((err) => console.error("Failed to fetch cart:", err));
       }
     }, []);
@@ -286,7 +296,7 @@ function BuyerPage() {
       ) : (
         <>
           <ListGroup>
-            {cart.map((item) => (
+            {Array.isArray(cart) && cart.map((item) => (
               <ListGroup.Item
                 key={item.animal_id || item.id}
                 className="d-flex justify-content-between align-items-center"

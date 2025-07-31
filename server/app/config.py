@@ -13,7 +13,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=1)
-    JWT_TOKEN_LOCATION = ['cookies']
+    # JWT_TOKEN_LOCATION = ['cookies']
     JWT_COOKIE_SECURE = True
     JWT_COOKIE_CSRF_PROTECT = False
     JWT_COOKIE_SAMESITE = 'None'
