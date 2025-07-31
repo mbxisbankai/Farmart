@@ -39,51 +39,50 @@ function BuyerPage() {
       setCart([...cart, animal]);
     }
   };
-
+  
   const handleCheckout = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("You need to be logged in to checkout.");
-      navigate("/login");
-      return;
-    }
-
-    if (cart.length === 0) {
-      alert("Your cart is empty.");
-      return;
-    }
-
-    const animalIds = cart.map((animal) => animal.id);
-
-    setCheckoutLoading(true);
-    try {
-      const response = await fetch(
-        `https://farmart-server-dcd6.onrender.com/api/payments/checkout`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({ animal_ids: animalIds }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Payment failed.");
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You need to be logged in to checkout.");
+        navigate("/login");
+        return;
       }
 
-      const data = await response.json();
-      alert(data.message || "Payment successful!");
-      setCart([]);
-    } catch (error) {
-      console.error("Checkout error:", error);
-      alert("Something went wrong during checkout.");
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
+      if (cart.length === 0) {
+        alert("Your cart is empty.");
+        return;
+      }
+
+      setCheckoutLoading(true);
+      try {
+        const response = await fetch(
+          `https://farmart-server-dcd6.onrender.com/api/orders/`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            credentials: "include", // important for cookie-based auth
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData?.error || "Checkout failed.");
+        }
+
+        const data = await response.json();
+        alert(data.message || "Order placed successfully!");
+        setCart([]);
+      } catch (error) {
+        console.error("Checkout error:", error);
+        alert("Something went wrong during checkout.");
+      } finally {
+        setCheckoutLoading(false);
+      }
+    };
+
 
   const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
 
