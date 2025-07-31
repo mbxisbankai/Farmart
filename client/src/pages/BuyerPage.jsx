@@ -174,7 +174,7 @@ const clearCart = async () => {
 };
 
 
-  const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
+  const totalPrice = Array.isArray(cart) ? cart.reduce((acc, item) => acc + item.price, 0) : 0;
 
   return (
     <Container className="mt-4">
