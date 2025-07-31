@@ -6,23 +6,17 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
 
-  // Calculate total price whenever cart changes
+  // Calculate total price when cart changes
   useEffect(() => {
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
     setTotalAmount(total);
   }, [cart]);
 
-  // Add item to cart
+  // Add item to cart (only if not already present)
   const addToCart = (animal) => {
-    const exists = cart.find((item) => item.id === animal.id);
-    if (exists) {
-      setCart(cart.map((item) =>
-        item.id === animal.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...animal, quantity: 1 }]);
+    const exists = cart.some((item) => item.id === animal.id);
+    if (!exists) {
+      setCart([...cart, animal]);
     }
   };
 
@@ -31,7 +25,7 @@ export const CartProvider = ({ children }) => {
     setCart(cart.filter((item) => item.id !== id));
   };
 
-  // Clear all items from cart
+  // Clear all items
   const clearCart = () => {
     setCart([]);
   };
@@ -48,7 +42,6 @@ export const CartProvider = ({ children }) => {
         body: JSON.stringify({
           items: cart.map((item) => ({
             animal_id: item.id,
-            quantity: item.quantity,
           })),
         }),
       });
