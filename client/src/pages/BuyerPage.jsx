@@ -22,23 +22,74 @@ function BuyerPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`https://farmart-server-dcd6.onrender.com/api/animals/`)
-      .then((res) => res.json())
-      .then((data) => {
-        setAnimals(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch animals:", err);
-        setLoading(false);
-      });
-  }, []);
+      fetch(`https://farmart-server-dcd6.onrender.com/api/animals/`)
+        .then((res) => res.json())
+        .then((data) => {
+          setAnimals(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch animals:", err);
+          setLoading(false);
+        });
 
-  const addToCart = (animal) => {
-    if (!cart.some((item) => item.id === animal.id)) {
-      setCart([...cart, animal]);
-    }
-  };
+      const token = localStorage.getItem("token");
+      if (token) {
+        fetch("https://farmart-server-dcd6.onrender.com/api/cart/", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then((res) => res.json())
+          .then(setCart)
+          .catch((err) => console.error("Failed to fetch cart:", err));
+      }
+    }, []);
+
+
+  const addToCart = async (animal) => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("You need to be logged in to add to cart.");
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "https://farmart-server-dcd6.onrender.com/api/cart/",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ animal_id: animal.id }),
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result?.error || "Failed to add to cart.");
+        }
+
+        // Fetch updated cart from server
+        const cartResponse = await fetch(
+          "https://farmart-server-dcd6.onrender.com/api/cart/",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const cartData = await cartResponse.json();
+        setCart(cartData);
+
+        alert("Item added to cart!");
+      } catch (error) {
+        console.error("Add to cart error:", error);
+        alert(error.message || "Something went wrong.");
+      }
+    };
+
   
   const handleCheckout = async () => {
       const token = localStorage.getItem("token");
