@@ -21,52 +21,47 @@ function BuyerPage() {
   const { cart, setCart } = useContext(CartContext);
   const navigate = useNavigate();
 
-    useEffect(() => {
+  useEffect(() => {
       const token = localStorage.getItem("token");
 
-      if (!token) {
+      if (!token || token.split(".").length !== 3) {
+        console.error("Invalid or missing token:", token);
         navigate("/login");
         return;
       }
 
-      fetch(`https://farmart-server-dcd6.onrender.com/api/animals/`, {
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
+      // Fetch animals
+      fetch("https://farmart-server-dcd6.onrender.com/api/animals/", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
+        headers,
         credentials: "include",
-      }
-      )
+      })
+        .then((res) => res.json())
+        .then(setAnimals)
+        .catch((err) => console.error("Failed to fetch animals:", err))
+        .finally(() => setLoading(false));
+
+      // Fetch cart
+      fetch("https://farmart-server-dcd6.onrender.com/api/cart/", {
+        headers,
+        credentials: "include",
+      })
         .then((res) => res.json())
         .then((data) => {
-          setAnimals(data);
-          setLoading(false);
+          console.log("Cart response:", data);
+          if (Array.isArray(data)) {
+            setCart(data);
+          } else {
+            console.warn("Cart data is not an array:", data);
+            setCart([]);
+          }
         })
-        .catch((err) => {
-          console.error("Failed to fetch animals:", err);
-          setLoading(false);
-        });
-
-      if (token) {
-        fetch("https://farmart-server-dcd6.onrender.com/api/cart/", {
-          headers: { Authorization: `Bearer ${token}` },
-          credentials: "include"
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            console.log("Cart response:", data);
-            if (Array.isArray(data)) {
-              setCart(data);
-            } else if (Array.isArray(data.cart)) {
-              setCart(data.cart);
-            } else {
-              console.warn("Cart data is not an array:", data);
-              setCart([]); // prevent .map() crash
-            }
-          })
-          .catch((err) => console.error("Failed to fetch cart:", err));
-      }
+        .catch((err) => console.error("Failed to fetch cart:", err));
     }, []);
 
 
