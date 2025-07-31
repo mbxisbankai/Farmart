@@ -1,9 +1,12 @@
-// pages/PaymentPage.jsx
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 
 const backendUrl = "https://farmart-server-dcd6.onrender.com";
 
-function PaymentPage({ orderId, totalAmount }) {
+function PaymentPage() {
+  const location = useLocation();
+  const { orderId, totalAmount } = location.state || {};  // Destructure from state
+
   const [paymentMethod, setPaymentMethod] = useState("M-Pesa");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -22,7 +25,7 @@ function PaymentPage({ orderId, totalAmount }) {
           order_id: orderId,
           payment_method: paymentMethod,
         }),
-        credentials: "include"
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error("Payment failed");
@@ -34,6 +37,15 @@ function PaymentPage({ orderId, totalAmount }) {
       setError("Payment failed. Please try again.");
     }
   };
+
+  if (!orderId || !totalAmount) {
+    return (
+      <div className="container mt-4">
+        <h2>Error</h2>
+        <p>Missing payment information. Please return to your cart or orders page.</p>
+      </div>
+    );
+  }
 
   if (paymentSuccess) {
     return (

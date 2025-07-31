@@ -195,8 +195,8 @@ function BuyerPage() {
       {
         method: "POST",
         headers: {
-          // Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
         body: JSON.stringify({
@@ -213,12 +213,16 @@ function BuyerPage() {
       throw new Error(data?.error || "Checkout failed.");
     }
 
-    // Clear cart and show success
+    // Clear the cart state
     setCart([]);
-    alert("🎉 Order placed successfully!");
 
-    // Optionally redirect to orders page
-    navigate("/orders");
+    // Redirect to payment page with order ID and total amount
+    navigate("/payment", {
+      state: {
+        orderId: data.id,
+        totalAmount: data.total_amount || 0,
+      },
+    });
   } catch (err) {
     console.error("Checkout error:", err);
     alert(err.message || "Something went wrong during checkout.");
@@ -226,8 +230,6 @@ function BuyerPage() {
     setCheckoutLoading(false);
   }
 };
-
-
 
   const totalPrice = Array.isArray(cart) ? cart.reduce((acc, item) => acc + item.price, 0) : 0;
 
