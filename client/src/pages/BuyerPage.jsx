@@ -90,6 +90,50 @@ function BuyerPage() {
       }
     };
 
+  const removeFromCart = async (animalId) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("You need to be logged in.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://farmart-server-dcd6.onrender.com/api/cart/",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ animal_id: animalId }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to remove item.");
+      }
+
+      // Refresh cart
+      const updated = await fetch(
+        "https://farmart-server-dcd6.onrender.com/api/cart/",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const updatedCart = await updated.json();
+      setCart(updatedCart);
+
+      alert("Item removed from cart.");
+    } catch (error) {
+      console.error("Remove from cart error:", error);
+      alert(error.message || "Failed to remove item.");
+    }
+  };
   
   const handleCheckout = async () => {
       const token = localStorage.getItem("token");
@@ -133,60 +177,45 @@ function BuyerPage() {
         setCheckoutLoading(false);
       }
     };
+  
+  const clearCart = async () => {
+    const token = localStorage.getItem("token");
 
+    if (!token) {
+      alert("You need to be logged in.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://farmart-server-dcd6.onrender.com/api/cart/clear",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err?.error || "Failed to clear cart.");
+      }
+
+      setCart([]);
+      alert("Cart cleared successfully!");
+    } catch (error) {
+      console.error("Clear cart error:", error);
+      alert(error.message || "Failed to clear cart.");
+    }
+  };
 
   const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
 
   return (
     <Container className="mt-4">
-      <h2 className="text-center mb-4">🐮 Welcome Buyer</h2>
-
-      {loading ? (
-        <div className="text-center mt-5">
-          <Spinner animation="border" />
-        </div>
-      ) : animals.length === 0 ? (
-        <p className="text-center text-muted">No animals available at the moment.</p>
-      ) : (
-        <>
-          <h4 className="mb-3">Browse Available Animals</h4>
-          <Row>
-            {animals.map((animal) => (
-              <Col key={animal.id} md={4} className="mb-4">
-                <Card>
-                  {animal.image_url && (
-                    <Card.Img
-                      variant="top"
-                      src={animal.image_url}
-                      alt={animal.name}
-                      style={{ height: "200px", objectFit: "cover" }}
-                    />
-                  )}
-                  <Card.Body>
-                    <Card.Title>{animal.name}</Card.Title>
-                    <Card.Subtitle className="mb-2 text-muted">
-                      {animal.breed}
-                    </Card.Subtitle>
-                    <Card.Text>
-                      Age: {animal.age} years <br />
-                      Price: KES {animal.price}
-                    </Card.Text>
-                    <Button
-                      variant="success"
-                      size="sm"
-                      onClick={() => addToCart(animal)}
-                    >
-                      Add to Cart
-                    </Button>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </>
-      )}
-
-      <hr className="my-4" />
+      {/* ...existing content */}
 
       <h4 className="mb-3">🛒 My Cart</h4>
       {cart.length === 0 ? (
@@ -195,16 +224,30 @@ function BuyerPage() {
         <>
           <ListGroup>
             {cart.map((item) => (
-              <ListGroup.Item key={item.id}>
-                {item.name} - KES {item.price}
+              <ListGroup.Item
+                key={item.animal_id || item.id}
+                className="d-flex justify-content-between align-items-center"
+              >
+                <div>
+                  {item.animal_name || item.name} - KES {item.price}
+                </div>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={() => removeFromCart(item.animal_id || item.id)}
+                >
+                  Remove
+                </Button>
               </ListGroup.Item>
             ))}
           </ListGroup>
+
           <div className="mt-3 d-flex justify-content-between">
             <strong>Total:</strong>
             <span>KES {totalPrice}</span>
           </div>
-          <div className="text-center mt-4">
+
+          <div className="text-center mt-4 d-flex gap-2 justify-content-center">
             <Button
               variant="primary"
               onClick={handleCheckout}
@@ -212,11 +255,14 @@ function BuyerPage() {
             >
               {checkoutLoading ? "Processing..." : "Checkout"}
             </Button>
+
+            {/* 👇 Clear Cart Button */}
+            <Button variant="outline-secondary" onClick={clearCart}>
+              Clear Cart
+            </Button>
           </div>
         </>
       )}
-
-      <hr className="my-5" />
 
       {/* ✅ Testimonials Section */}
       <div className="mt-5">
