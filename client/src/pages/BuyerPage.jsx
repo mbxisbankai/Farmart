@@ -37,6 +37,7 @@ function BuyerPage() {
       if (token) {
         fetch("https://farmart-server-dcd6.onrender.com/api/cart/", {
           headers: { Authorization: `Bearer ${token}` },
+          credentials: "include"
         })
           .then((res) => res.json())
           .then(setCart)
@@ -46,176 +47,167 @@ function BuyerPage() {
 
 
   const addToCart = async (animal) => {
-      const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-      if (!token) {
-        alert("You need to be logged in to add to cart.");
-        navigate("/login");
-        return;
+  if (!token) {
+    alert("You need to be logged in to add to cart.");
+    navigate("/login");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "https://farmart-server-dcd6.onrender.com/api/cart/",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ animal_id: animal.id }),
       }
+    );
 
-      try {
-        const response = await fetch(
-          "https://farmart-server-dcd6.onrender.com/api/cart/",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ animal_id: animal.id }),
-          }
-        );
+    const result = await response.json();
 
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result?.error || "Failed to add to cart.");
-        }
-
-        // Fetch updated cart from server
-        const cartResponse = await fetch(
-          "https://farmart-server-dcd6.onrender.com/api/cart/",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const cartData = await cartResponse.json();
-        setCart(cartData);
-
-        alert("Item added to cart!");
-      } catch (error) {
-        console.error("Add to cart error:", error);
-        alert(error.message || "Something went wrong.");
-      }
-    };
-
-  const removeFromCart = async (animalId) => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("You need to be logged in.");
-      navigate("/login");
-      return;
+    if (!response.ok) {
+      throw new Error(result?.error || "Failed to add to cart.");
     }
 
-    try {
-      const response = await fetch(
-        "https://farmart-server-dcd6.onrender.com/api/cart/",
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ animal_id: animalId }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result?.error || "Failed to remove item.");
+    // Refresh cart
+    const cartResponse = await fetch(
+      "https://farmart-server-dcd6.onrender.com/api/cart/",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       }
+    );
+    const cartData = await cartResponse.json();
+    setCart(cartData);
 
-      // Refresh cart
-      const updated = await fetch(
-        "https://farmart-server-dcd6.onrender.com/api/cart/",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const updatedCart = await updated.json();
-      setCart(updatedCart);
+    alert("Item added to cart!");
+  } catch (error) {
+    console.error("Add to cart error:", error);
+    alert(error.message || "Something went wrong.");
+  }
+};
 
-      alert("Item removed from cart.");
-    } catch (error) {
-      console.error("Remove from cart error:", error);
-      alert(error.message || "Failed to remove item.");
-    }
-  };
-  
-  const handleCheckout = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You need to be logged in to checkout.");
-        navigate("/login");
-        return;
+const removeFromCart = async (animalId) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("You need to be logged in.");
+    navigate("/login");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "https://farmart-server-dcd6.onrender.com/api/cart/",
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ animal_id: animalId }),
       }
+    );
 
-      if (cart.length === 0) {
-        alert("Your cart is empty.");
-        return;
-      }
+    const result = await response.json();
 
-      setCheckoutLoading(true);
-      try {
-        const response = await fetch(
-          `https://farmart-server-dcd6.onrender.com/api/orders/`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            credentials: "include", // important for cookie-based auth
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData?.error || "Checkout failed.");
-        }
-
-        const data = await response.json();
-        alert(data.message || "Order placed successfully!");
-        setCart([]);
-      } catch (error) {
-        console.error("Checkout error:", error);
-        alert("Something went wrong during checkout.");
-      } finally {
-        setCheckoutLoading(false);
-      }
-    };
-  
-  const clearCart = async () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("You need to be logged in.");
-      navigate("/login");
-      return;
+    if (!response.ok) {
+      throw new Error(result?.error || "Failed to remove item.");
     }
 
-    try {
-      const response = await fetch(
-        "https://farmart-server-dcd6.onrender.com/api/cart/clear",
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err?.error || "Failed to clear cart.");
+    const updated = await fetch(
+      "https://farmart-server-dcd6.onrender.com/api/cart/",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       }
+    );
+    const updatedCart = await updated.json();
+    setCart(updatedCart);
 
-      setCart([]);
-      alert("Cart cleared successfully!");
-    } catch (error) {
-      console.error("Clear cart error:", error);
-      alert(error.message || "Failed to clear cart.");
+    alert("Item removed from cart.");
+  } catch (error) {
+    console.error("Remove from cart error:", error);
+    alert(error.message || "Failed to remove item.");
+  }
+};
+
+const clearCart = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("You need to be logged in.");
+    navigate("/login");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "https://farmart-server-dcd6.onrender.com/api/cart/clear",
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err?.error || "Failed to clear cart.");
     }
-  };
+
+    setCart([]);
+    alert("Cart cleared successfully!");
+  } catch (error) {
+    console.error("Clear cart error:", error);
+    alert(error.message || "Failed to clear cart.");
+  }
+};
+
 
   const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
 
   return (
     <Container className="mt-4">
       {/* ...existing content */}
+      <h4 className="mb-4">🐄 Available Animals</h4>
+        {loading ? (
+          <div className="text-center my-4">
+            <Spinner animation="border" variant="primary" />
+          </div>
+        ) : (
+          <Row>
+            {animals.map((animal) => (
+              <Col md={4} sm={6} xs={12} key={animal.id} className="mb-4">
+                <Card>
+                  <Card.Img
+                    variant="top"
+                    src={animal.image_url || "https://via.placeholder.com/300x200"}
+                    alt={animal.name}
+                    style={{ height: "200px", objectFit: "cover" }}
+                  />
+                  <Card.Body>
+                    <Card.Title>{animal.name}</Card.Title>
+                    <Card.Text>Breed: {animal.breed}</Card.Text>
+                    <Card.Text>Price: KES {animal.price}</Card.Text>
+                    <Button variant="success" onClick={() => addToCart(animal)}>
+                      Add to Cart
+                    </Button>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
 
       <h4 className="mb-3">🛒 My Cart</h4>
       {cart.length === 0 ? (
