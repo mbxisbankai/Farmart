@@ -22,7 +22,22 @@ function BuyerPage() {
   const navigate = useNavigate();
 
     useEffect(() => {
-      fetch(`https://farmart-server-dcd6.onrender.com/api/animals/`)
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      fetch(`https://farmart-server-dcd6.onrender.com/api/animals/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        credentials: "include",
+      }
+      )
         .then((res) => res.json())
         .then((data) => {
           setAnimals(data);
@@ -33,7 +48,6 @@ function BuyerPage() {
           setLoading(false);
         });
 
-      const token = localStorage.getItem("token");
       if (token) {
         fetch("https://farmart-server-dcd6.onrender.com/api/cart/", {
           headers: { Authorization: `Bearer ${token}` },
