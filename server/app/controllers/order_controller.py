@@ -1,7 +1,9 @@
 from flask import jsonify
 from app.extensions import db
 from flask_jwt_extended import get_jwt_identity
-from app.models.order import Order, Cart, Animal
+from app.models.order import Order
+from app.models.cart import Cart
+from app.models.animal import Animal
 from app.utils.core_controllers import CoreController, CoreControllerOne
 
 class OrderController(CoreController):
