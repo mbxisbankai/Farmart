@@ -1,6 +1,6 @@
 from flask import jsonify
 from app.extensions import db
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.order import Order
 from app.models.cart import Cart
 from app.models.animal import Animal
@@ -18,6 +18,7 @@ class OrderControllerOne(CoreControllerOne):
 order_controller = OrderController()
 order_controller_one = OrderControllerOne()
 
+@jwt_required()
 def create_order():
     user_id = get_jwt_identity()
 
