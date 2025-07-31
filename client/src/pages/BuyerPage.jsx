@@ -195,7 +195,7 @@ function BuyerPage() {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          // Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         credentials: "include",
