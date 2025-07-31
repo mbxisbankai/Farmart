@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from app.models import User, Animal, Order  # adjust if model is Purchase or Booking instead
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
-from app.config import db
+from app.extensions import db
 
 admin_bp = Blueprint("admin_bp", __name__, url_prefix="/api/admin")
 
